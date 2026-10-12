@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash|apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rtk proxy sh -c 'task_root=$(git rev-parse --show-toplevel) && exec \"$task_root/scripts/node\" node \"$task_root/scripts/sync-project-skill.mjs\" --hook'",
+            "timeout": 10,
+            "statusMessage": "同步升学360项目 skill"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rtk proxy sh -c 'task_root=$(git rev-parse --show-toplevel) && exec \"$task_root/scripts/node\" node \"$task_root/scripts/sync-project-skill.mjs\" --hook'",
+            "timeout": 10,
+            "statusMessage": "同步升学360项目 skill"
+          }
+        ]
+      }
+    ]
+  }
+}

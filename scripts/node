@@ -1,0 +1,5 @@
+#!/bin/sh
+if [ -x "$HOME/.nvm/versions/node/v24.14.1/bin/node" ]; then
+  export PATH="$HOME/.nvm/versions/node/v24.14.1/bin:$PATH"
+fi
+exec "$@"

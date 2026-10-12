@@ -1,0 +1,4 @@
+interface:
+  display_name: "升学360项目开发"
+  short_description: "维护成绩填报系统的家长端、管理员后台、数据库和开发约定"
+  default_prompt: "使用 $shengxue360-development 修改当前项目，并同步设计文档与项目 skill。"

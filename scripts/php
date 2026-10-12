@@ -1,0 +1,8 @@
+#!/bin/sh
+# Select the project's PHP without altering the machine's global runtime.
+if [ -x /opt/homebrew/opt/php@8.4/bin/php ]; then
+  export PHP_INI_SCAN_DIR=""
+  export PHPRC=/opt/homebrew/etc/php/8.4/php.ini-production
+  exec /opt/homebrew/opt/php@8.4/bin/php "$@"
+fi
+exec php "$@"
