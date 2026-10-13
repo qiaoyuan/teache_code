@@ -42,6 +42,12 @@ rtk proxy ./scripts/node npm run skill:test
 
 同步使用源文件白名单，不读取 `.env`、账号凭据、业务数据库、备份、日志和聊天，不执行迁移或部署。安装登记、源文件哈希和短期锁放在已被 Git 忽略的 `storage/app/private/skill-sync/`，不含源代码和业务内容。无变化不改写文件，避免 hook 自触发循环。
 
+## 注册协议
+
+家长注册需主动同意《用户协议与隐私政策》，可在弹窗阅读或访问 `/app/agreement` 阅读完整页面。服务端拒绝未同意或旧版本注册，保存当前版本及 UTC 同意时间；原有账号记录保持 NULL。协议版本、最近更新日期与联系方式位于 `config/agreement.php`，正文位于 `resources/views/agreement.blade.php`。修改正文时同步更新版本。
+
+本次新增迁移只给 parents 增加两个可空字段，已有环境执行 `./scripts/php artisan migrate --force`，不重建数据库。隐私联系电话为 18117988868，可在“我的”查看并联系申请注销或撤回授权；在线自动处理入口未实现。生产环境按下文部署章节启用 HTTPS。
+
 ## 新环境安装
 
 需要 PHP 8.4+（PDO MySQL、mbstring、intl、DOM、XMLReader/Writer、ZIP 等扩展）、Composer、Node 22.12+、MySQL 8.0+。依赖精确版本记录在两份 lock 文件中。本机验证版本为 PHP 8.4.5、Node 24.14.1、MySQL 9.2.0；MySQL 8.0 的生产部署尚未实机验证。

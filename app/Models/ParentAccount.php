@@ -16,7 +16,7 @@ class ParentAccount extends Authenticatable
 
     protected function casts(): array
     {
-        return ['id' => 'integer', 'password' => 'hashed', 'must_change_password' => 'boolean', 'auth_version' => 'integer'];
+        return ['id' => 'integer', 'password' => 'hashed', 'must_change_password' => 'boolean', 'auth_version' => 'integer', 'agreement_accepted_at' => 'datetime'];
     }
 
     public function students()

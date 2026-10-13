@@ -1,8 +1,8 @@
 # 项目结构快照（自动生成）
 
 项目目录：`/Users/qiaoyuan/Documents/ChatGPT/teacher`
-设计版本：V1.5
-源文件指纹：`c354fee52ab8210967820963f576b31b5a1e5ee46a128763e14981122efff372`
+设计版本：V1.6
+源文件指纹：`3ae948465b9c9a69b477254c812f061e4051ececfdde4a9f3ae006157f9c6efe`
 
 来源是当前磁盘文件，不代表测试通过、需求确认或部署完成。不读取数据库、环境凭据或聊天。
 
@@ -29,6 +29,7 @@ Route::pattern('student', '[1-9][0-9]*');
 Route::get('/', fn () => redirect('/app/'));
 Route::get('/app/login', fn () => view('app'));
 Route::get('/app/register', fn () => view('app'));
+Route::get('/app/agreement', fn (Request $r) => view('agreement', ['embedded' => $r->boolean('embedded')]));
 Route::get('/admin/login', fn () => view('admin'));
 Route::get('/app/{path?}', fn () => view('app'))->where('path', '.*')->middleware('portal:parent');
 Route::get('/admin/{path?}', fn () => view('admin'))->where('path', '.*')->middleware('portal:admin');
@@ -119,6 +120,7 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 - `database/migrations/2026_10_12_000003_widen_student_gender.php`
 - `database/migrations/2026_10_12_000004_convert_business_ids_to_integers.php`
 - `database/migrations/2026_10_12_000005_put_id_first_and_use_datetime.php`
+- `database/migrations/2026_10_13_000001_add_registration_agreement_to_parents.php`
 - `database/seeders/DatabaseSeeder.php`
 
 ## 前端与模板
@@ -146,12 +148,14 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 - `resources/js/shared/api.ts`
 - `resources/js/shared/types.ts`
 - `resources/views/admin.blade.php`
+- `resources/views/agreement.blade.php`
 - `resources/views/app.blade.php`
 
 ## 测试
 
 - `tests/Feature/ExampleTest.php`
 - `tests/Feature/GrowthSystemTest.php`
+- `tests/Feature/RegistrationAgreementTest.php`
 - `tests/TestCase.php`
 - `tests/skills/sync-project-skill.test.mjs`
 

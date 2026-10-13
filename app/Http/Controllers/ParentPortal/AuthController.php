@@ -9,16 +9,32 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
     public function register(Request $r)
     {
-        $data = $r->validate(['phone' => 'required|regex:/^1[3-9][0-9]{9}$/', 'password' => [...Text::passwordRules(), 'confirmed']]);
+        $data = $r->validate([
+            'phone' => 'required|regex:/^1[3-9][0-9]{9}$/',
+            'password' => [...Text::passwordRules(), 'confirmed'],
+            'agreement_accepted' => ['required', 'accepted'],
+            'agreement_version' => ['required', 'string', Rule::in([config('agreement.version')])],
+        ], [
+            'agreement_accepted.required' => '请阅读并同意用户协议与隐私政策',
+            'agreement_accepted.accepted' => '请阅读并同意用户协议与隐私政策',
+            'agreement_version.required' => '请刷新页面并阅读最新用户协议与隐私政策',
+            'agreement_version.in' => '协议已更新，请刷新页面后重新阅读并同意',
+        ]);
         $p = DB::transaction(function () use ($data) {
             abort_if(ParentAccount::where('phone', $data['phone'])->exists(), 409);
 
-            return ParentAccount::create($data);
+            return ParentAccount::create([
+                'phone' => $data['phone'],
+                'password' => $data['password'],
+                'agreement_version' => config('agreement.version'),
+                'agreement_accepted_at' => now(),
+            ]);
         });
         Auth::guard('parent')->login($p);
         $r->session()->regenerate();

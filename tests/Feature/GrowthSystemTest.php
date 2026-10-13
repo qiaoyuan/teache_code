@@ -133,7 +133,7 @@ class GrowthSystemTest extends TestCase
 
     public function test_registration_hashes_password_and_duplicate_phone_conflicts(): void
     {
-        $data = ['phone' => '13800000002', 'password' => 'Goodpass123', 'password_confirmation' => 'Goodpass123'];
+        $data = ['phone' => '13800000002', 'password' => 'Goodpass123', 'password_confirmation' => 'Goodpass123', 'agreement_accepted' => true, 'agreement_version' => config('agreement.version')];
         $this->postJson('/api/v1/app/auth/register', $data)->assertCreated()->assertJsonMissingPath('user.password');
         $p = ParentAccount::first();
         $this->assertNotSame($data['password'], $p->password);

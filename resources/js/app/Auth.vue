@@ -20,16 +20,34 @@ const form = reactive({
     }),
     busy = ref(false),
     error = ref(""),
-    showHelp = ref(false);
+    showHelp = ref(false),
+    agreementDialog = ref<HTMLDialogElement | null>(null),
+    agreementAccepted = ref(false);
+const agreementVersion =
+    document.querySelector<HTMLMetaElement>('meta[name="agreement-version"]')
+        ?.content || "";
+function openAgreement() {
+    agreementDialog.value?.showModal();
+}
 async function submit() {
     if (busy.value) return;
-    busy.value = true;
     error.value = "";
+    if (mode.value === "register" && !agreementAccepted.value) {
+        error.value = "请阅读并同意用户协议与隐私政策";
+        return;
+    }
+    busy.value = true;
     try {
         const d = await api(
             `auth/${mode.value === "change" ? "change-password" : mode.value}`,
             "POST",
-            form,
+            mode.value === "register"
+                ? {
+                      ...form,
+                      agreement_accepted: agreementAccepted.value,
+                      agreement_version: agreementVersion,
+                  }
+                : form,
         );
         state.user = d.user;
         state.ready = true;
@@ -140,8 +158,38 @@ async function submit() {
                         placeholder="请再次输入密码"
                         required
                 /></label>
+                <div v-if="mode === 'register'" class="agreement-consent">
+                    <div class="agreement-choice">
+                        <input
+                            id="agreement-accepted"
+                            v-model="agreementAccepted"
+                            type="checkbox"
+                            required
+                            :disabled="busy"
+                        />
+                        <div>
+                            <label for="agreement-accepted"
+                                >我已阅读并同意</label
+                            ><button
+                                class="agreement-link"
+                                type="button"
+                                @click="openAgreement"
+                            >
+                                《用户协议与隐私政策》
+                            </button>
+                        </div>
+                    </div>
+                    <p>
+                        请确认您是孩子的父母或法定监护人，或已取得监护人授权。
+                    </p>
+                </div>
                 <div v-if="error" role="alert" class="error">{{ error }}</div>
-                <button class="primary full" :disabled="busy">
+                <button
+                    class="primary full"
+                    :disabled="
+                        busy || (mode === 'register' && !agreementAccepted)
+                    "
+                >
                     {{
                         busy
                             ? "正在提交…"
@@ -169,5 +217,37 @@ async function submit() {
                 </p>
             </form>
         </div>
+        <dialog
+            ref="agreementDialog"
+            class="modal agreement-dialog"
+            aria-label="用户协议与隐私政策"
+        >
+            <div class="agreement-dialog-head">
+                <strong>用户协议与隐私政策</strong
+                ><button
+                    type="button"
+                    aria-label="关闭协议"
+                    @click="agreementDialog?.close()"
+                >
+                    关闭
+                </button>
+            </div>
+            <iframe
+                v-if="mode === 'register'"
+                src="/app/agreement?embedded=1"
+                title="用户协议与隐私政策全文"
+            ></iframe>
+            <div class="agreement-dialog-foot">
+                <button
+                    type="button"
+                    class="secondary"
+                    @click="agreementDialog?.close()"
+                >
+                    返回注册</button
+                ><a href="/app/agreement" target="_blank" rel="noopener"
+                    >打开完整页面</a
+                >
+            </div>
+        </dialog>
     </main>
 </template>

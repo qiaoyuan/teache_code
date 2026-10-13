@@ -18,14 +18,18 @@ class Client:
   if result.get('csrf_token'):self.csrf[portal]=result['csrf_token']
   return result
 c=Client();other=Client();c.call('app','auth/csrf');other.call('app','auth/csrf')
-c.call('app','students',status=401);c.call('app','auth/register','POST',{'phone':'13800000001','password':'ParentPass123','password_confirmation':'ParentPass123'},201)
+import re
+register_html=c.opener.open(args.url+'/app/register').read().decode()
+agreement_version=re.search(r'<meta name="agreement-version" content="([^"]+)"',register_html).group(1)
+agreement={'agreement_accepted':True,'agreement_version':agreement_version}
+c.call('app','students',status=401);c.call('app','auth/register','POST',{'phone':'13800000001','password':'ParentPass123','password_confirmation':'ParentPass123',**agreement},201)
 student=c.call('app','students','POST',{'name':'林小禾（测试）','gender':'female','school':'实验小学','entry_year':2021,'entry_grade':'P1','current_grade':'P6','contact_phone':'13900000001'},201)['data']
 sid=student['id']
 for date,title,math,maxscore,grade in [('2026-09-01','开学摸底考试',88,100,'A'),('2026-10-01','秋季月考',106,120,'优秀')]:
  e=c.call('app',f'students/{sid}/exams','POST',{'title':title,'exam_date':date,'grade_at_exam':'P6','school_at_exam':'实验小学','note':'隔离测试库中的演示记录','subjects':[{'name':'语文','mode':'score','score':92,'max_score':100},{'name':'数学','mode':'score','score':math,'max_score':maxscore},{'name':'英语','mode':'grade','grade':grade}]},201)['data']
 c.call('app',f'students/{sid}/intentions','POST',{'school':'实验中学','level':'first','note':'关注课程和校园环境'},201)
 c.call('app',f'students/{sid}/intentions','POST',{'school':'育才中学','level':'backup','note':'通勤方便'},201)
-other.call('app','auth/register','POST',{'phone':'13800000002','password':'OtherPass123','password_confirmation':'OtherPass123'},201)
+other.call('app','auth/register','POST',{'phone':'13800000002','password':'OtherPass123','password_confirmation':'OtherPass123',**agreement},201)
 other.call('app',f'students/{sid}',status=403);other.call('app',f'exams/{e["id"]}',status=403)
 c.call('admin','auth/csrf');c.call('admin','auth/login','POST',{'username':'preview_admin','password':'PreviewAdmin123'})
 c.call('app','auth/me');c.call('admin','auth/me')

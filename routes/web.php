@@ -12,6 +12,7 @@ Route::pattern('student', '[1-9][0-9]*');
 Route::get('/', fn () => redirect('/app/'));
 Route::get('/app/login', fn () => view('app'));
 Route::get('/app/register', fn () => view('app'));
+Route::get('/app/agreement', fn (Request $r) => view('agreement', ['embedded' => $r->boolean('embedded')]));
 Route::get('/admin/login', fn () => view('admin'));
 Route::get('/app/{path?}', fn () => view('app'))->where('path', '.*')->middleware('portal:parent');
 Route::get('/admin/{path?}', fn () => view('admin'))->where('path', '.*')->middleware('portal:admin');
