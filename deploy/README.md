@@ -2,14 +2,27 @@
 
 本目录提供 Linux + Nginx + PHP 8.4-FPM + MySQL 的单域名部署模板。正式代码为 Laravel 13 + Vue 3，家长 `/app/`、后台 `/admin/`，统一进入 `public/index.php`。这些文件是部署材料，尚未替你安装服务器或开通域名。
 
-## 需要替换的配置
+## 当前推荐：宝塔双域名部署
+
+使用 `nginx.baota.conf.example`，其优先级高于下文旧单域名示例。家长访问 https://www.shengxue360.com 后进入 /app/；后台访问 https://admin.shengxue360.com 后进入 /admin/。无需修改现有业务路由；家长域名拒绝后台路径，后台域名拒绝家长路径。共享同一套代码、数据库和 public/build。
+
+1. DNS 的 @、www、admin 三条 A 记录指向服务器公网 IP。
+2. 宝塔创建一个 PHP 8.4 站点，绑定三个域名；假设代码目录 `/www/wwwroot/shengxue360`，运行目录 `/public`。实际路径不同则替换配置全部 root。
+3. 先通过面板申请覆盖三个域名的证书。检查证书存储目录，配置默认使用 `/www/server/panel/vhost/cert/www.shengxue360.com/`。不要在证书文件尚不存在时粘贴 SSL 配置。
+4. 备份面板原站点配置，将本模板整体作为该站点配置，只加载一次。不要再保留同域名的其他 server，也不要叠加 enable-php 或面板伪静态 include；本文件已包含入口规则。PHP socket 默认 `/tmp/php-cgi-84.sock`，以实际 PHP 8.4 pool 配置为准。
+5. Laravel `.env` 设置 `APP_URL=https://www.shengxue360.com`、`SESSION_DOMAIN=null`、`SESSION_SECURE_COOKIE=true`；保留 APP_KEY，执行 `php artisan config:cache`。CLI 同样选择 PHP 8.4。
+6. 宝塔保存前检查配置，或执行 `/www/server/nginx/sbin/nginx -t`；成功后通过面板重载 Nginx。确认面板证书续期任务仍正常，HTTP 的验证路径已保留。
+
+首次部署先按后文安装依赖、迁移和构建资源。此模板不代表已完成 DNS/证书/服务器部署。原 `nginx.conf.example` 和 HTTP bootstrap 文件仅作为旧单域名参考，不与此文件同时加载。
+
+## 旧单域名参考配置
 
 | 配置 | 模板值 | 说明 |
 | --- | --- | --- |
-| 域名 | `example.com` | 替换 Nginx 中全部域名及 `.env` 的 APP_URL |
+| 域名 | `shengxue360.com` | 已确认正式根域；Nginx 与 APP_URL 已配置一致 |
 | 项目目录 | `/var/www/shengxue360` | Nginx root 必须以 `/public` 结尾 |
 | PHP-FPM | `/run/php/php8.4-fpm.sock` | 改成 PHP 8.4 pool 实际 listen 地址；TCP 可写 `127.0.0.1:9000` |
-| 证书 | `/etc/letsencrypt/live/example.com/` | 配置完整证书链与私钥的实际位置 |
+| 证书 | `/etc/letsencrypt/live/shengxue360.com/` | 配置完整证书链与私钥的实际位置 |
 | 数据库 | `127.0.0.1:3306 / shengxue360` | 沿用已确认库名；生产使用专用账号与强密码 |
 | 数据库账号 | `shengxue360` | 替换 `.env` 中账号和 CHANGE_ME 密码 |
 | FPM 用户组 | `www-data` | 以下权限命令为 Debian/Ubuntu 示例，按实际 FPM 用户组修改 |
@@ -74,7 +87,7 @@ php artisan view:cache
 
 ## 三、启用 HTTPS 与 Nginx
 
-先把域名解析到服务器，并放行 80/443。修改模板中的域名、目录、socket、证书路径；不要修改本机开发站点配置。
+先把域名解析到服务器，并放行 80/443。核对模板中的项目目录、socket、证书路径；不要修改本机开发站点配置。
 
 已有证书时，将 `nginx.conf.example` 安装为 Nginx 实际加载的站点配置，例如 `/etc/nginx/conf.d/shengxue360.conf`。该目录必须已被主配置的 http 块 include。宝塔可将相同 server 内容适配到该站点配置，使用面板的真实证书路径和 PHP 8.4 socket；不要重复定义 server 或再叠加其他 PHP location。
 
@@ -84,7 +97,7 @@ php artisan view:cache
 2. 使用已安装的证书工具或面板签发证书。例如安装并配置 Certbot 后执行：
 
 ```sh
-sudo certbot certonly --webroot -w /var/www/shengxue360/public -d example.com
+sudo certbot certonly --webroot -w /var/www/shengxue360/public -d shengxue360.com
 ```
 
 3. 将临时站点文件替换为正式 `nginx.conf.example` 的修改版，保证同一域名只有一份配置；证书路径存在后再测试、加载。
@@ -98,7 +111,7 @@ sudo systemctl reload nginx
 
 证书续期需要由证书工具的定时任务及成功后的 Nginx reload hook 负责；安装模板本身不会自动建立续期任务。按实际证书工具配置并验证续期。
 
-生产 `.env` 必须保持 `APP_URL=https://实际域名`、`SESSION_SECURE_COOKIE=true`。模板的 fastcgi HTTPS 参数使 Laravel 正确识别安全请求。两端同源，不需额外 CORS 配置。HTTP 自动跳 HTTPS；协议弹窗允许同源 iframe。
+生产 `.env` 必须保持 `APP_URL=https://shengxue360.com`、`SESSION_SECURE_COOKIE=true`。模板的 fastcgi HTTPS 参数使 Laravel 正确识别安全请求。两端同源，不需额外 CORS 配置。HTTP 自动跳 HTTPS；协议弹窗允许同源 iframe。
 
 ## 四、后续更新
 

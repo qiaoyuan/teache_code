@@ -45,3 +45,8 @@
 主键约定：7 张业务表 id 统一为 BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY，外键为同类型整数，API 的 ID 返回数字，不使用 HasUuids。手机号保持字符串。数据库 session 增加 portal，以 portal + user_id 撤销家长会话，不能因管理员 ID 与家长 ID 重叠而删除后台会话。已有 UUID 库通过新增迁移保留数据升级，先备份、维护；框架会话、缓存与批次标识保留默认类型。
 
 id 必须位于业务表首列；created_at、updated_at、deleted_at（存在时）统一使用 DATETIME，UTC 存储，由 Laravel 维护时间，不设数据库自动更新。保留 NULL 和软删除语义。已有库通过新增迁移调整字段顺序和类型，不能修改历史时间值。框架队列时间继续保留 Unix 秒数。
+
+## 正式部署域名（2026-10-13 确认）
+
+正式部署采用 `www.shengxue360.com` 家长端、`admin.shengxue360.com` 后台，根域 `shengxue360.com` 跳转 www；保留现有 `/app/`、`/admin/` 路径，域名首页分别跳转对应路径。生产 APP_URL 为 `https://www.shengxue360.com`，SESSION_DOMAIN=null，使 Cookie 按主机隔离。
+部署配置与操作步骤见 `deploy/README.md`；域名确认不代表已完成 DNS、证书或服务器部署。

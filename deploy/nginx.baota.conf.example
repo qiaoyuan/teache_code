@@ -1,0 +1,99 @@
+# 宝塔：整份文件只加载一次，不再叠加相同域名的 server。
+# 项目路径 /www/wwwroot/shengxue360；PHP 8.4 socket /tmp/php-cgi-84.sock。
+# 证书必须同时覆盖 shengxue360.com、www.shengxue360.com、admin.shengxue360.com。
+# 先在宝塔申请证书，再启用本配置；证书路径以面板实际位置为准。
+
+server {
+    listen 80;
+    server_name shengxue360.com www.shengxue360.com;
+    root /www/wwwroot/shengxue360/public;
+    location ^~ /.well-known/acme-challenge/ { try_files $uri =404; }
+    location / { return 301 https://www.shengxue360.com$request_uri; }
+}
+server {
+    listen 80;
+    server_name admin.shengxue360.com;
+    root /www/wwwroot/shengxue360/public;
+    location ^~ /.well-known/acme-challenge/ { try_files $uri =404; }
+    location / { return 301 https://admin.shengxue360.com$request_uri; }
+}
+server {
+    listen 443 ssl;
+    server_name shengxue360.com;
+    ssl_certificate /www/server/panel/vhost/cert/www.shengxue360.com/fullchain.pem;
+    ssl_certificate_key /www/server/panel/vhost/cert/www.shengxue360.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    return 301 https://www.shengxue360.com$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name www.shengxue360.com;
+    ssl_certificate /www/server/panel/vhost/cert/www.shengxue360.com/fullchain.pem;
+    ssl_certificate_key /www/server/panel/vhost/cert/www.shengxue360.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    root /www/wwwroot/shengxue360/public;
+    index index.php;
+    charset utf-8;
+    server_tokens off;
+    client_max_body_size 2m;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options SAMEORIGIN always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    access_log /www/wwwlogs/www.shengxue360.com.log;
+    error_log /www/wwwlogs/www.shengxue360.com.error.log warn;
+
+    location = / { return 302 /app/$is_args$args; }
+    # 拒绝在此域名使用另一端的页面和接口。
+    location ~ ^/(?:admin|api/v1/admin)(?:/|$) { return 404; }
+    location / { try_files $uri $uri/ /index.php?$query_string; }
+    location /build/ { expires 1y; try_files $uri =404; }
+
+    location = /index.php {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $realpath_root/index.php;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+        fastcgi_param HTTPS on;
+        fastcgi_param HTTP_PROXY "";
+        fastcgi_pass unix:/tmp/php-cgi-84.sock;
+        fastcgi_read_timeout 120s;
+    }
+    location ~* \.php(?:/|$) { return 404; }
+    location ~ /\. { deny all; }
+}
+
+server {
+    listen 443 ssl;
+    server_name admin.shengxue360.com;
+    ssl_certificate /www/server/panel/vhost/cert/www.shengxue360.com/fullchain.pem;
+    ssl_certificate_key /www/server/panel/vhost/cert/www.shengxue360.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    root /www/wwwroot/shengxue360/public;
+    index index.php;
+    charset utf-8;
+    server_tokens off;
+    client_max_body_size 2m;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options SAMEORIGIN always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    access_log /www/wwwlogs/admin.shengxue360.com.log;
+    error_log /www/wwwlogs/admin.shengxue360.com.error.log warn;
+
+    location = / { return 302 /admin/$is_args$args; }
+    # 拒绝在此域名使用另一端的页面和接口。
+    location ~ ^/(?:app|api/v1/app)(?:/|$) { return 404; }
+    location / { try_files $uri $uri/ /index.php?$query_string; }
+    location /build/ { expires 1y; try_files $uri =404; }
+
+    location = /index.php {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $realpath_root/index.php;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+        fastcgi_param HTTPS on;
+        fastcgi_param HTTP_PROXY "";
+        fastcgi_pass unix:/tmp/php-cgi-84.sock;
+        fastcgi_read_timeout 120s;
+    }
+    location ~* \.php(?:/|$) { return 404; }
+    location ~ /\. { deny all; }
+}

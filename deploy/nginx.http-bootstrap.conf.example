@@ -1,8 +1,8 @@
 # 仅申请/验证证书时临时启用。不会对外开放家长和后台业务。
-# 替换域名及 public 路径；与正式配置二选一，不能同时加载。
+# 域名已设为 shengxue360.com；调整 public 路径；与正式配置二选一，不能同时加载。
 server {
     listen 80;
-    server_name example.com;
+    server_name shengxue360.com;
     root /var/www/shengxue360/public;
     server_tokens off;
 

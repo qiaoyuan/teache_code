@@ -142,6 +142,8 @@ preview-seed 拒绝正式库；HTTP 脚本在这个空测试库中创建固定�
 
 ## LNMP 部署
 
+当前宝塔采用 www 家长端、admin 后台：使用 [宝塔双域名配置](deploy/nginx.baota.conf.example)，细节见部署说明。旧单域名示例不与之同时加载。
+
 完整首次安装、HTTPS、权限、更新步骤及排错见 [部署说明](deploy/README.md)。
 
 - 正式 Nginx 配置：[deploy/nginx.conf.example](deploy/nginx.conf.example)。
