@@ -16,6 +16,7 @@ const links = [
     { path: "/exams", label: "考试批次", icon: "▧" },
     { path: "/scores", label: "科目成绩", icon: "▥" },
     { path: "/intentions", label: "学校意向", icon: "◇" },
+    { path: "/administrators", label: "管理员账号", icon: "⚙" },
     { path: "/audit-logs", label: "操作日志", icon: "◷" },
 ];
 async function logout() {

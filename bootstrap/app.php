@@ -28,7 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
         $e->render(function (UniqueConstraintViolationException $ex, Request $r) {
             if ($r->is('api/*')) {
-                return response()->json(['error' => ['code' => 'CONFLICT', 'message' => '该手机号、科目或学校已存在，请检查后重试']], 409);
+                return response()->json(['error' => ['code' => 'CONFLICT', 'message' => '该账号、手机号、科目或学校已存在，请检查后重试']], 409);
             }
         });
         $e->render(function (ValidationException $ex, Request $r) {

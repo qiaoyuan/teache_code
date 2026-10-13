@@ -22,6 +22,7 @@ import App from "./App.vue";
 import Login from "./Login.vue";
 import Overview from "./Overview.vue";
 import Data from "./Data.vue";
+import Administrators from "./Administrators.vue";
 import { init, state } from "./state";
 import "./style.css";
 const router = createRouter({
@@ -30,6 +31,7 @@ const router = createRouter({
     routes: [
         { path: "/login", component: Login },
         { path: "/", component: Overview },
+        { path: "/administrators", component: Administrators },
         ...[
             "parents",
             "students",

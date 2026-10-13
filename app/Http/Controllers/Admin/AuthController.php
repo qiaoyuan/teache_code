@@ -13,6 +13,7 @@ class AuthController extends Controller
         $d = $r->validate(['username' => 'required|string|max:64', 'password' => 'required|string|max:100']);
         abort_unless(Auth::guard('admin')->attempt($d), 401);
         $r->session()->regenerate();
+        $r->session()->put('admin_auth_version', Auth::guard('admin')->user()->auth_version);
 
         return ['user' => Auth::guard('admin')->user(), 'csrf_token' => $r->session()->token()];
     }

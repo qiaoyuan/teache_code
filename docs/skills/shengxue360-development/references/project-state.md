@@ -1,8 +1,8 @@
 # 项目结构快照（自动生成）
 
 项目目录：`/Users/qiaoyuan/Documents/ChatGPT/teacher`
-设计版本：V1.6
-源文件指纹：`7600610248117d5daf8e4194b04fd115502ce7b67aaa77633dde54bfd9979c8d`
+设计版本：V1.7
+源文件指纹：`21307492b63fa091fd357c9ea3fff9d419fac2a6aa91f6be8f49a6feb762668f`
 
 来源是当前磁盘文件，不代表测试通过、需求确认或部署完成。不读取数据库、环境凭据或聊天。
 
@@ -64,6 +64,9 @@ Route::get('auth/me', [A\AuthController::class, 'me']);
 Route::post('auth/logout', [A\AuthController::class, 'logout']);
 foreach (['overview', 'parents', 'students', 'scores', 'exams', 'intentions', 'analysis'] as $action) {
 Route::get($action, [A\DataController::class, $action]);
+Route::get('administrators', [A\AdministratorController::class, 'index']);
+Route::post('administrators', [A\AdministratorController::class, 'store'])->middleware('throttle:password-reset');
+Route::post('administrators/{id}/password', [A\AdministratorController::class, 'password'])->middleware('throttle:password-reset');
 Route::get('audit-logs', [A\DataController::class, 'audit']);
 Route::get('parents/{id}', [A\DataController::class, 'parentDetail']);
 Route::post('parents/{id}/reset-password', [A\DataController::class, 'resetPassword'])->middleware('throttle:password-reset');
@@ -84,6 +87,7 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 
 ## 控制器与请求校验
 
+- `app/Http/Controllers/Admin/AdministratorController.php`
 - `app/Http/Controllers/Admin/AuthController.php`
 - `app/Http/Controllers/Admin/DataController.php`
 - `app/Http/Controllers/Admin/ExportController.php`
@@ -121,10 +125,12 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 - `database/migrations/2026_10_12_000004_convert_business_ids_to_integers.php`
 - `database/migrations/2026_10_12_000005_put_id_first_and_use_datetime.php`
 - `database/migrations/2026_10_13_000001_add_registration_agreement_to_parents.php`
+- `database/migrations/2026_10_13_000002_add_auth_version_to_administrators.php`
 - `database/seeders/DatabaseSeeder.php`
 
 ## 前端与模板
 
+- `resources/js/admin/Administrators.vue`
 - `resources/js/admin/App.vue`
 - `resources/js/admin/Data.vue`
 - `resources/js/admin/Login.vue`
@@ -153,6 +159,7 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 
 ## 测试
 
+- `tests/Feature/AdministratorManagementTest.php`
 - `tests/Feature/ExampleTest.php`
 - `tests/Feature/GrowthSystemTest.php`
 - `tests/Feature/RegistrationAgreementTest.php`

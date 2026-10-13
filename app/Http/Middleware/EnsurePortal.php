@@ -17,6 +17,14 @@ class EnsurePortal
             } abort(401, '请先登录');
         }
         Auth::shouldUse($role);
+        if ($role === 'admin' && (int) $request->session()->get('admin_auth_version', 0) !== $user->auth_version) {
+            Auth::guard('admin')->logout();
+            $request->session()->invalidate();
+            if (! $request->is('api/*')) {
+                return redirect('/admin/login');
+            }
+            abort(401, '密码已变更，请重新登录');
+        }
         if ($role === 'parent') {
             if ((int) $request->session()->get('parent_auth_version', 0) !== $user->auth_version) {
                 Auth::guard('parent')->logout();

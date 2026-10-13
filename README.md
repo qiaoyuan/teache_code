@@ -175,3 +175,12 @@ mysql --login-path=growth shengxue360_restore_check < growth-backup.sql
 本机已使用虚构测试数据进行一次备份导出和恢复检查；生产定时备份与生产恢复演练尚未执行。
 
 需求及接口的完整规则见 `docs/开发设计文档.md`，验收证据见 `docs/验收记录.md`。
+
+## V1.7 管理员账号管理
+
+- 后台新增 `/admin/administrators` 页面，支持分页查看管理员、新增账号和修改自己或其他管理员密码。继续使用单一 admin 角色，所有管理员权限相同；本次不增加删除、禁用或角色分级。
+- 新建账号为 3–64 位 ASCII 字母/数字/下划线/点/短横线，以字母或数字开头，统一转小写并防止重名。密码沿用 8–64 位、含字母和数字、UTF-8 不超过 72 字节规则，需确认密码。
+- 新增和改密均验证操作者当前密码并限流；仅后台已登录用户可访问，家长无法使用。保存密码哈希，不返回明文或哈希。
+- `administrators.auth_version` 为 unsigned integer，默认 0，以新增迁移保留现有账号及密码。改密递增版本并按 portal=admin、user_id 清除目标会话，拦截旧版本会话；修改自己密码后退出并重新登录，不影响同数字 ID 的家长会话。
+- 审计记录操作者、目标账号、IP、时间；不记录密码。新增接口：GET/POST `/api/v1/admin/administrators`，POST `/api/v1/admin/administrators/{id}/password`。
+- 升级需先执行 `php artisan migrate --force`，再构建前端、刷新配置/路由/视图缓存。修改初始管理员密码通过此页面进行，不通过 .env 的 ADMIN_PASSWORD 覆盖已有账号。

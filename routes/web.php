@@ -50,6 +50,9 @@ Route::prefix('api/v1/admin')->group(function () {
         foreach (['overview', 'parents', 'students', 'scores', 'exams', 'intentions', 'analysis'] as $action) {
             Route::get($action, [A\DataController::class, $action]);
         }
+        Route::get('administrators', [A\AdministratorController::class, 'index']);
+        Route::post('administrators', [A\AdministratorController::class, 'store'])->middleware('throttle:password-reset');
+        Route::post('administrators/{id}/password', [A\AdministratorController::class, 'password'])->middleware('throttle:password-reset');
         Route::get('audit-logs', [A\DataController::class, 'audit']);
         Route::get('parents/{id}', [A\DataController::class, 'parentDetail']);
         Route::post('parents/{id}/reset-password', [A\DataController::class, 'resetPassword'])->middleware('throttle:password-reset');
