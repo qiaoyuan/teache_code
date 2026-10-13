@@ -12,7 +12,6 @@ import {
 import type { SubjectAnalysis } from "../shared/types";
 import AuthorizeParentLogin from "./AuthorizeParentLogin.vue";
 import TrendChart from "../shared/TrendChart.vue";
-const authorizationTarget = ref<{ id: number; phone: string } | null>(null);
 const route = useRoute(),
     kind = computed(() => route.path.slice(1)),
     filters = reactive({ phone: "", school: "", grade: "" }),
@@ -260,7 +259,6 @@ async function reset() {
 }
 </script>
 <template>
-    <AuthorizeParentLogin v-if="authorizationTarget" :parent="authorizationTarget" @close="authorizationTarget = null" />
     <div class="page-heading">
         <div>
             <p class="eyebrow">RECORDS & MANAGEMENT</p>
@@ -377,7 +375,7 @@ async function reset() {
                         type="primary"
                         @click="openReset(scope.row)"
                         >重置密码</el-button
-                    ><el-button v-if="kind === 'parents'" link type="primary" @click="authorizationTarget = scope.row">授权登录</el-button></template
+                    ><AuthorizeParentLogin v-if="kind === 'parents'" :parent="scope.row" /></template
                 ></el-table-column
             ></el-table
         >

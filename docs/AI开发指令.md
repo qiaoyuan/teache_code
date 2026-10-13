@@ -21,7 +21,7 @@
 7. 家长自行修改与软删除，删除学生后关联记录退出查询、统计与导出。
 8. 档案保存当前年级和学校，考试保存考试时年级和学校快照。
 9. 填报长期开放，没有截止、审核或录取流程。
-10. 导出真实 Excel 工作簿，支持全量和全部筛选结果，不限当前分页。
+10. 导出真实 Excel 工作簿，支持全量和全部筛选结果，不限当前分页。all 全量工作簿的三张表均按注册家长手机号升序、学生姓名升序、记录 ID 升序排列，使相同手机号、相同姓名的记录连续；排序在数据库分批读取前完成。单类导出和后台列表保持原有排序。
 
 后端已确定为 Laravel。采用 Laravel + MySQL + Vue 3 + TypeScript + Vite，后台使用 Element Plus；家长 H5 保留原型的手机布局与配色，用 Vue 组件重建。实施默认版本基线为 Laravel 13、PHP 8.4；校验实际运行环境和依赖后锁定版本，不自行改用其他后端框架。
 
@@ -67,9 +67,9 @@ id 必须位于业务表首列；created_at、updated_at、deleted_at（存在�
 
 ## V1.8 管理员授权登录家长前台
 
-- `/admin/parents` 每行新增“授权登录”，管理员输入自己的当前密码后，在新窗口打开配置 `APP_URL` 下的 `/app/authorized-login`。正式环境 `APP_URL=https://www.shengxue360.com`，不需要放宽双域名 Nginx 隔离或 Cookie 域。
+- `/admin/parents` 每行新增“授权登录”，已登录管理员点击后直接在新窗口打开配置 `APP_URL` 下的 `/app/authorized-login`，不再弹窗确认或要求再次输入密码。正式环境 `APP_URL=https://www.shengxue360.com`，不需要放宽双域名 Nginx 隔离或 Cookie 域。
 - 此功能按既有管理员权限默认仅查看，不能代填、修改或删除学生、考试、意向，也不能修改家长密码；页面隐藏写入口，服务端统一返回 `403 / AUTHORIZED_READ_ONLY`。可查看本人目标家长名下资料，跨家长仍返回 403。
-- 后台 `POST /api/v1/admin/parents/{id}/authorize-login` 校验 admin 会话、当前密码、CSRF 并限流。使用 64 位随机凭证，服务端以 SHA-256 摘要作为缓存键，1 分钟有效；`POST /api/v1/app/auth/authorized-login` 原子消费一次，保留家长端 CSRF 校验。凭证放在 URL fragment，进入页面立即清除，不进入查询参数、localStorage 或审计日志。
+- 后台 `POST /api/v1/admin/parents/{id}/authorize-login` 无需提交密码，校验 admin 会话、CSRF 并限流。使用 64 位随机凭证，服务端以 SHA-256 摘要作为缓存键，1 分钟有效；`POST /api/v1/app/auth/authorized-login` 原子消费一次，保留家长端 CSRF 校验。凭证放在 URL fragment，进入页面立即清除，不进入查询参数、localStorage 或审计日志。
 - 两域名须共享同一应用数据库、APP_KEY 和支持锁的缓存（生产使用现有 database 缓存）。无需新增数据表或迁移。授权会话最长 30 分钟，每次请求检查目标家长和操作者的 auth_version；任一账号改密后授权失效。
 - 授权进入重新生成家长会话，仅切换当前浏览器的家长身份；后台登录与家长其他设备不受影响。家长前台持续显示目标手机号、操作者、仅查看状态、到期时间和“退出授权查看”。退出仅销毁该家长端会话。
 - 授权查看可读取待强制改密账号的业务资料，但不解除 must_change_password 标记；家长本人正常登录仍须改密。家长使用自己的密码重新登录后清除授权状态，恢复正常家长权限。

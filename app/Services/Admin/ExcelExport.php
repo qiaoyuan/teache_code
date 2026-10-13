@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Cell\StringCell;
@@ -21,6 +22,24 @@ class ExcelExport
     private function row(array $values): Row
     {
         return new Row(array_map(fn ($v) => is_int($v) || is_float($v) ? Cell::fromValue($v) : new StringCell((string) ($v ?? '')), $values));
+    }
+
+    private function orderByParentAndStudent(Builder $query, string $type): Builder
+    {
+        $student = DB::table('students as export_students')
+            ->join('parents as export_parents', 'export_parents.id', '=', 'export_students.parent_id');
+        if ($type === 'scores') {
+            $student->join('exams as export_exams', 'export_exams.student_id', '=', 'export_students.id')
+                ->whereColumn('export_exams.id', 'exam_subjects.exam_id');
+        } else {
+            $student->whereColumn('export_students.id', $type === 'students' ? 'students.id' : 'intentions.student_id');
+        }
+
+        // Sort before batching; the unique ID keeps equal phone/name rows stable.
+        return $query->reorder()
+            ->orderBy((clone $student)->select('export_parents.phone'))
+            ->orderBy((clone $student)->select('export_students.name'))
+            ->orderBy($query->getModel()->qualifyColumn('id'));
     }
 
     public function write(string $path, string $kind, array $filters): array
@@ -43,7 +62,11 @@ class ExcelExport
                     $sheet->setColumnWidth(40, 1);
                     $writer->addRow(Row::fromValuesWithStyle($headers, (new Style)->withFontBold(true)->withBackgroundColor('235E48')->withFontColor('FFFFFF')));
                     $counts[$type] = 0;
-                    foreach ($this->queries->$type($filters)->lazy(500) as $record) {
+                    $query = $this->queries->$type($filters);
+                    if ($kind === 'all') {
+                        $query = $this->orderByParentAndStudent($query, $type);
+                    }
+                    foreach ($query->lazy(500) as $record) {
                         $values = match ($type) {
                             'students' => [$record->id, $record->name, ['male' => '男', 'female' => '女', 'unspecified' => '未填写'][$record->gender], $record->school, (int) $record->entry_year, $this->grade($record->entry_grade), $this->grade($record->current_grade), $record->contact_phone, $record->parent->phone, (int) $record->exams_count, (int) $record->intentions_count],
                             'scores' => [$record->id, $record->exam->student->parent->phone, $record->exam->student->name, $record->exam->title, $record->exam->exam_date->toDateString(), $record->exam->school_at_exam, $this->grade($record->exam->grade_at_exam), $record->name, $record->mode === 'score' ? '分数' : '等级', $record->mode === 'score' ? (float) $record->score : '', $record->mode === 'score' ? (float) $record->max_score : '', $record->mode === 'score' ? round((float) $record->score / (float) $record->max_score * 100, 2) : '', $record->grade, $record->exam->note],

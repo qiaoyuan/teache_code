@@ -29,7 +29,7 @@ class ParentAuthorizationTest extends TestCase
     {
         config(['app.url' => 'https://www.shengxue360.com']);
         $response = $this->actingAs($admin, 'admin')->withSession(['admin_auth_version' => $admin->auth_version])
-            ->postJson('/api/v1/admin/parents/'.$parent->id.'/authorize-login', ['current_password' => 'AdminPass123']);
+            ->postJson('/api/v1/admin/parents/'.$parent->id.'/authorize-login');
         $response->assertOk();
         $this->assertStringStartsWith('https://www.shengxue360.com/app/authorized-login#token=', $response->json('url'));
 
@@ -43,19 +43,20 @@ class ParentAuthorizationTest extends TestCase
         return $this->postJson('/api/v1/app/auth/authorized-login', ['token' => $token]);
     }
 
-    public function test_only_an_authenticated_admin_with_correct_password_can_issue_a_grant(): void
+    public function test_only_an_authenticated_admin_can_issue_a_grant_without_a_password(): void
     {
         [$admin, $parent] = $this->accounts();
         $path = '/api/v1/admin/parents/'.$parent->id.'/authorize-login';
-        $this->postJson($path, ['current_password' => 'AdminPass123'])->assertUnauthorized();
+        $this->postJson($path)->assertUnauthorized();
         $this->actingAs($parent, 'parent')->withSession(['parent_auth_version' => 1]);
-        $this->postJson($path, ['current_password' => 'AdminPass123'])->assertUnauthorized();
+        $this->postJson($path)->assertUnauthorized();
         $this->actingAs($admin, 'admin');
-        $this->postJson($path, ['current_password' => 'wrong'])->assertStatus(400);
-        $this->postJson('/api/v1/admin/parents/9999/authorize-login', ['current_password' => 'AdminPass123'])->assertNotFound();
+        $this->postJson('/api/v1/admin/parents/9999/authorize-login')->assertNotFound();
         $this->assertDatabaseCount('audit_logs', 0);
+        $this->issue($admin, $parent);
+        $this->assertDatabaseCount('audit_logs', 1);
         $admin->update(['auth_version' => 1]);
-        $this->postJson($path, ['current_password' => 'AdminPass123'])->assertUnauthorized();
+        $this->postJson($path)->assertUnauthorized();
     }
 
     public function test_exchange_authenticates_only_the_target_parent_and_audits_without_secrets(): void
@@ -179,6 +180,6 @@ class ParentAuthorizationTest extends TestCase
         // Laravel normally skips CSRF in tests. Use the production middleware branch.
         $this->app->instance('env', 'production');
         $this->postJson('/api/v1/app/auth/authorized-login', ['token' => $token])->assertStatus(419);
-        $this->actingAs($admin, 'admin')->postJson('/api/v1/admin/parents/'.$parent->id.'/authorize-login', ['current_password' => 'AdminPass123'])->assertStatus(419);
+        $this->actingAs($admin, 'admin')->postJson('/api/v1/admin/parents/'.$parent->id.'/authorize-login')->assertStatus(419);
     }
 }

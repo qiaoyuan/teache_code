@@ -373,6 +373,57 @@ class GrowthSystemTest extends TestCase
         $this->assertEquals(80, $e['sheets']['科目成绩'][1][9]);
     }
 
+    public function test_all_export_groups_each_sheet_by_phone_and_name_across_batches(): void
+    {
+        $higherPhone = $this->parent('13800000002');
+        $lowerPhone = $this->parent('13800000001');
+        $groups = [
+            [$lowerPhone, '学生A'], [$lowerPhone, '学生B'],
+            [$higherPhone, '学生A'], [$higherPhone, '学生B'],
+        ];
+        $expected = array_fill(0, 4, []);
+        // Interleave phones and names, including separate students with the same name.
+        for ($i = 0; $i < 504; $i++) {
+            $group = [3, 1, 2, 0][$i % 4];
+            [$parent, $name] = $groups[$group];
+            $student = $this->student($parent, ['name' => $name]);
+            $exam = $student->exams()->create([
+                'title' => '期中考试', 'exam_date' => '2026-10-01',
+                'grade_at_exam' => 'P4', 'school_at_exam' => '实验小学',
+            ]);
+            $score = $exam->subjects()->create([
+                'name' => '数学', 'subject_key' => '数学', 'mode' => 'score',
+                'score' => 80, 'max_score' => 100, 'position' => 0,
+            ]);
+            $intention = $student->intentions()->create([
+                'school' => '实验中学', 'school_key' => '实验中学', 'level' => 'first',
+            ]);
+            foreach (['学生档案' => $student, '科目成绩' => $score, '学校意向' => $intention] as $sheet => $record) {
+                $expected[$group][$sheet][] = [$record->id, $parent->phone, $name];
+            }
+        }
+
+        foreach ([[], ['phone' => $lowerPhone->phone, 'school' => '实验', 'grade' => 'P4', 'page' => 2, 'per_page' => 1]] as $filters) {
+            $export = $this->export($filters);
+            $count = $filters === [] ? 504 : 252;
+            $this->assertSame(['students' => $count, 'scores' => $count, 'intentions' => $count], $export['counts']);
+            foreach (['学生档案', '科目成绩', '学校意向'] as $sheet) {
+                $rows = array_slice($export['sheets'][$sheet], 1);
+                $actual = array_map(fn ($row) => $sheet === '学生档案'
+                    ? [$row[0], $row[8], $row[1]]
+                    : [$row[0], $row[1], $row[2]], $rows);
+                $ordered = array_merge(...array_column($expected, $sheet));
+                if ($filters !== []) {
+                    $ordered = array_values(array_filter($ordered, fn ($row) => $row[1] === $lowerPhone->phone));
+                }
+                $this->assertSame($ordered, $actual, $sheet);
+            }
+            foreach (array_slice($export['sheets']['学生档案'], 1) as $row) {
+                $this->assertSame([1, 1], [$row[9], $row[10]]);
+            }
+        }
+    }
+
     public function test_admin_initialization_is_idempotent(): void
     {
         $this->artisan('admin:init', ['--username' => 'tester', '--password' => 'Original123'])->assertSuccessful();
