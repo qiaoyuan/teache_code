@@ -142,16 +142,15 @@ preview-seed 拒绝正式库；HTTP 脚本在这个空测试库中创建固定�
 
 ## LNMP 部署
 
-1. 配置 PHP 8.4-FPM、生产 MySQL 和域名；Nginx 站点根目录必须指向项目 `public/`。
-2. 使用 `deploy/nginx.conf.example`，按服务器修改根目录、server_name、FPM socket，并配置域名 HTTPS 证书。
-3. `.env` 设置 `APP_ENV=production`、`APP_DEBUG=false`、正确的 HTTPS `APP_URL`、`SESSION_SECURE_COOKIE=true`、数据库账号、APP_KEY 与管理员初始化配置。
-4. 执行 `composer install --no-dev --optimize-autoloader`、`npm ci --ignore-scripts`、`npm run build`、`php artisan migrate --force`、首次 `php artisan admin:init --no-interaction`。
-5. 给 FPM 用户写入 `storage/` 和 `bootstrap/cache/` 的权限，随后执行 `php artisan config:cache`、`php artisan route:cache`、`php artisan view:cache`。
-6. 检查 `/up`、两端登录、填报、跨账号禁止访问及 Excel 下载。
+完整首次安装、HTTPS、权限、更新步骤及排错见 [部署说明](deploy/README.md)。
 
-初始化命令在配置缓存后也读取 `config/growth.php`，修改环境配置后重新执行 config:cache。两端构建资源可由 Nginx 提供，接口交给 PHP-FPM，同源无需 CORS。首版同步生成 Excel，无额外队列进程。
+- 正式 Nginx 配置：[deploy/nginx.conf.example](deploy/nginx.conf.example)。
+- 无证书时的临时验证站点：[deploy/nginx.http-bootstrap.conf.example](deploy/nginx.http-bootstrap.conf.example)。
+- 生产环境模板：[deploy/env.production.example](deploy/env.production.example)，首次安装复制为根目录 `.env` 并填入实际配置。
 
-当前本地服务只监听 127.0.0.1。生产域名、服务器与证书未部署；静态原型预览地址仍保持原型功能。
+使用 PHP 8.4-FPM，站点根目录指向 public；家长 `/app/` 与后台 `/admin/` 统一走 Laravel。部署模板以 HTTPS 为前提，不覆盖本机开发 `.env`。更新时保留已有 APP_KEY 与数据库数据；Git 不包含 public/build，需要构建或上传对应产物。
+
+当前材料未替用户部署生产服务器、申请证书或配置定时备份。
 
 ## 数据库备份与恢复
 

@@ -2,7 +2,7 @@
 
 项目目录：`/Users/qiaoyuan/Documents/ChatGPT/teacher`
 设计版本：V1.6
-源文件指纹：`3ae948465b9c9a69b477254c812f061e4051ececfdde4a9f3ae006157f9c6efe`
+源文件指纹：`2be23b78862df6fa6af332bf8cb1b6387e8ea03698f2564a770e92adc240b961`
 
 来源是当前磁盘文件，不代表测试通过、需求确认或部署完成。不读取数据库、环境凭据或聊天。
 
@@ -161,6 +161,7 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 
 ## 运行、部署与同步
 
+- `deploy/README.md`
 - `scripts/node`
 - `scripts/php`
 - `scripts/preview-seed.php`

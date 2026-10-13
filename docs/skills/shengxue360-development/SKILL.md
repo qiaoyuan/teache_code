@@ -39,7 +39,7 @@ description: "维护升学360成绩记录与招生意向采集项目（teacher�
 | 迁移、SQL、字段类型 | 在独立 MySQL 测试库验证；SQLite 不能替代 MySQL 特有约束检查 |
 | skill、同步脚本、hook | `rtk proxy ./scripts/node npm run skill:test`、同步并校验 skill；无业务代码改动不必重跑全部 PHP 测试 |
 
-部署与运行命令见 README，不能根据快照推断测试已经通过或服务已部署。
+部署详见 `deploy/README.md`：正式 HTTPS Nginx、临时证书验证站点、`deploy/env.production.example` 生产模板。统一 public 入口，更新保留已有 APP_KEY 与 .env；不能根据快照推断测试已经通过或服务已部署。
 
 ## 自动同步
 
@@ -53,7 +53,7 @@ description: "维护升学360成绩记录与招生意向采集项目（teacher�
 
 <!-- project-state:start -->
 
-当前设计 V1.6；9 个迁移；107 个受监测源文件。源指纹：`3ae948465b9c9a69`。
+当前设计 V1.6；9 个迁移；108 个受监测源文件。源指纹：`2be23b78862df6fa`。
 详见 [项目结构快照](references/project-state.md)。本段由 hook 更新。
 
 <!-- project-state:end -->

@@ -1,19 +1,59 @@
-# Example only: substitute the real domain, deployment path, FPM socket and TLS configuration.
+# 生产 HTTPS 模板：替换域名、项目路径、证书路径与 PHP-FPM socket。
+# 本文件加载到 nginx.conf 的 http {} 中；不要再包一层 http {}。
+# 没有证书时先用 nginx.http-bootstrap.conf.example，见 deploy/README.md。
 server {
     listen 80;
     server_name example.com;
     root /var/www/shengxue360/public;
+
+    location ^~ /.well-known/acme-challenge/ {
+        default_type text/plain;
+        try_files $uri =404;
+    }
+    location / { return 301 https://example.com$request_uri; }
+}
+
+server {
+    listen 443 ssl;
+    server_name example.com;
+    root /var/www/shengxue360/public;
     index index.php;
     charset utf-8;
+    server_tokens off;
     client_max_body_size 2m;
 
+    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:SHENGXUE360_TLS:10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+
+    access_log /var/log/nginx/shengxue360.access.log;
+    error_log /var/log/nginx/shengxue360.error.log warn;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options SAMEORIGIN always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+
     location / { try_files $uri $uri/ /index.php?$query_string; }
-    location /build/ { expires 1y; add_header Cache-Control "public, immutable"; try_files $uri =404; }
+
+    # 只缓存构建文件；不缓存登录、API 或导出响应。
+    location /build/ {
+        expires 1y;
+        try_files $uri =404;
+    }
+
+    # 两个端都只执行 Laravel 的入口，不单独创建 /app 或 /admin PHP 目录。
     location = /index.php {
         include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root/index.php;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+        fastcgi_param HTTPS on;
+        fastcgi_param HTTP_PROXY "";
         fastcgi_pass unix:/run/php/php8.4-fpm.sock;
+        fastcgi_read_timeout 120s;
     }
-    location ~ \.php$ { return 404; }
-    location ~ /\.(?!well-known).* { deny all; }
+
+    location ~* \.php(?:/|$) { return 404; }
+    location ~ /\. { deny all; }
 }
