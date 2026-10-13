@@ -4,6 +4,7 @@ namespace App\Http\Controllers\ParentPortal;
 
 use App\Http\Controllers\Controller;
 use App\Models\ParentAccount;
+use App\Services\Admin\ParentAuthorization;
 use App\Services\Shared\Text;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -36,6 +37,7 @@ class AuthController extends Controller
                 'agreement_accepted_at' => now(),
             ]);
         });
+        $r->session()->forget(ParentAuthorization::SESSION_KEY);
         Auth::guard('parent')->login($p);
         $r->session()->regenerate();
         $r->session()->put('parent_auth_version', $p->auth_version);
@@ -53,6 +55,7 @@ class AuthController extends Controller
         return DB::transaction(function () use ($r, $p, $data) {
             $p = ParentAccount::whereKey($p->id)->lockForUpdate()->firstOrFail();
             abort_unless(Hash::check($data['password'], $p->password), 401);
+            $r->session()->forget(ParentAuthorization::SESSION_KEY);
             Auth::guard('parent')->login($p);
             $r->session()->regenerate();
             $r->session()->put('parent_auth_version', $p->auth_version);
@@ -63,11 +66,12 @@ class AuthController extends Controller
 
     public function me(Request $r)
     {
-        return ['user' => $r->user()];
+        return ['user' => $r->user(), 'authorized_login' => app(ParentAuthorization::class)->info($r)];
     }
 
     public function logout(Request $r)
     {
+        app(ParentAuthorization::class)->finish($r);
         Auth::guard('parent')->logout();
         $r->session()->invalidate();
         $r->session()->regenerateToken();

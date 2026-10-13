@@ -1,11 +1,20 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { state, selectStudent } from "./state";
+import { state, selectStudent, readOnly, logout } from "./state";
+import { errorText } from "../shared/api";
+const exitBusy = ref(false), exitError = ref("");
+async function exitAuthorization() {
+    exitBusy.value = true;
+    exitError.value = "";
+    try { await logout(); await router.replace("/login"); }
+    catch (e) { exitError.value = errorText(e); }
+    finally { exitBusy.value = false; }
+}
 const route = useRoute(),
     router = useRouter();
 const isAuth = computed(() =>
-    ["/login", "/register", "/change-password"].includes(route.path),
+    ["/login", "/register", "/change-password", "/authorized-login"].includes(route.path),
 );
 function nav(kind: string) {
     router.push(
@@ -15,12 +24,17 @@ function nav(kind: string) {
               ? "/account"
               : state.selectedId
                 ? `/students/${state.selectedId}/${kind}`
-                : "/students/new",
+                : readOnly.value ? "/" : "/students/new",
     );
 }
 </script>
 <template>
     <div :class="{ shell: !isAuth }">
+        <aside v-if="state.authorizedLogin && !isAuth" class="authorization-banner" role="status">
+            <div><strong>管理员授权查看 · {{ state.user?.phone }}</strong><small>{{ state.authorizedLogin.admin_username }} · 仅查看 · {{ new Date(state.authorizedLogin.expires_at * 1000).toLocaleTimeString('zh-CN', { timeZone: 'Asia/Shanghai', hour12: false }) }} 到期</small></div>
+            <button class="secondary" :disabled="exitBusy" @click="exitAuthorization">退出授权查看</button>
+            <p v-if="exitError" class="error" role="alert">{{ exitError }}</p>
+        </aside>
         <header v-if="!isAuth" class="topbar">
             <RouterLink to="/" class="brand"
                 ><span class="brand-mark">芽</span>成长档案</RouterLink
@@ -42,7 +56,7 @@ function nav(kind: string) {
                 <option v-for="s in state.students" :key="s.id" :value="s.id">
                     {{ s.name }}
                 </option></select
-            ><RouterLink to="/students/new">＋ 添加</RouterLink>
+            ><RouterLink v-if="!readOnly" to="/students/new">＋ 添加</RouterLink>
         </div>
         <RouterView :key="route.fullPath" />
         <nav v-if="!isAuth" class="bottom-nav" aria-label="主导航">

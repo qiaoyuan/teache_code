@@ -63,3 +63,14 @@ id 必须位于业务表首列；created_at、updated_at、deleted_at（存在�
 ### 后台菜单组织
 
 后台导航：数据总览、家长账号、学生档案、考试批次、科目成绩、学校意向依次平铺；导航列表最后放可展开的“系统设置”，内含“管理员账号”和“操作日志”。进入系统页面时自动展开并显示对应面包屑，窄屏导航支持滚动。
+
+
+## V1.8 管理员授权登录家长前台
+
+- `/admin/parents` 每行新增“授权登录”，管理员输入自己的当前密码后，在新窗口打开配置 `APP_URL` 下的 `/app/authorized-login`。正式环境 `APP_URL=https://www.shengxue360.com`，不需要放宽双域名 Nginx 隔离或 Cookie 域。
+- 此功能按既有管理员权限默认仅查看，不能代填、修改或删除学生、考试、意向，也不能修改家长密码；页面隐藏写入口，服务端统一返回 `403 / AUTHORIZED_READ_ONLY`。可查看本人目标家长名下资料，跨家长仍返回 403。
+- 后台 `POST /api/v1/admin/parents/{id}/authorize-login` 校验 admin 会话、当前密码、CSRF 并限流。使用 64 位随机凭证，服务端以 SHA-256 摘要作为缓存键，1 分钟有效；`POST /api/v1/app/auth/authorized-login` 原子消费一次，保留家长端 CSRF 校验。凭证放在 URL fragment，进入页面立即清除，不进入查询参数、localStorage 或审计日志。
+- 两域名须共享同一应用数据库、APP_KEY 和支持锁的缓存（生产使用现有 database 缓存）。无需新增数据表或迁移。授权会话最长 30 分钟，每次请求检查目标家长和操作者的 auth_version；任一账号改密后授权失效。
+- 授权进入重新生成家长会话，仅切换当前浏览器的家长身份；后台登录与家长其他设备不受影响。家长前台持续显示目标手机号、操作者、仅查看状态、到期时间和“退出授权查看”。退出仅销毁该家长端会话。
+- 授权查看可读取待强制改密账号的业务资料，但不解除 must_change_password 标记；家长本人正常登录仍须改密。家长使用自己的密码重新登录后清除授权状态，恢复正常家长权限。
+- 操作日志记录签发、成功进入和主动退出：`parent_authorization_issued`、`parent_authorization_started`、`parent_authorization_ended`，包含管理员、目标家长、时间、IP 和只读标识，不记录任何密码或凭证。

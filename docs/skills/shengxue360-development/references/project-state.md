@@ -1,8 +1,8 @@
 # 项目结构快照（自动生成）
 
 项目目录：`/Users/qiaoyuan/Documents/ChatGPT/teacher`
-设计版本：V1.7
-源文件指纹：`0f88fd96843b37fa94431401627fdbd5f7be9210baeef437fddedefd9a71d4a6`
+设计版本：V1.8
+源文件指纹：`5a78a4d00bd8b769d03219c20840fd8bec6082855c09b5eab9a30f8c70db34ea`
 
 来源是当前磁盘文件，不代表测试通过、需求确认或部署完成。不读取数据库、环境凭据或聊天。
 
@@ -27,6 +27,7 @@
 Route::pattern('id', '[1-9][0-9]*');
 Route::pattern('student', '[1-9][0-9]*');
 Route::get('/', fn () => redirect('/app/'));
+Route::get('/app/authorized-login', fn () => response()->view('app')->header('Cache-Control', 'no-store')->header('Referrer-Policy', 'no-referrer'));
 Route::get('/app/login', fn () => view('app'));
 Route::get('/app/register', fn () => view('app'));
 Route::get('/app/agreement', fn (Request $r) => view('agreement', ['embedded' => $r->boolean('embedded')]));
@@ -35,6 +36,7 @@ Route::get('/app/{path?}', fn () => view('app'))->where('path', '.*')->middlewar
 Route::get('/admin/{path?}', fn () => view('admin'))->where('path', '.*')->middleware('portal:admin');
 Route::prefix('api/v1/app')->group(function () {
 Route::get('auth/csrf', fn (Request $r) => ['csrf_token' => $r->session()->token()]);
+Route::post('auth/authorized-login', [P\AuthorizedLoginController::class, 'store'])->middleware('throttle:authorized-login');
 Route::post('auth/register', [P\AuthController::class, 'register'])->middleware('throttle:register');
 Route::post('auth/login', [P\AuthController::class, 'login'])->middleware('throttle:login');
 Route::middleware('portal:parent')->group(function () {
@@ -69,6 +71,7 @@ Route::post('administrators', [A\AdministratorController::class, 'store'])->midd
 Route::post('administrators/{id}/password', [A\AdministratorController::class, 'password'])->middleware('throttle:password-reset');
 Route::get('audit-logs', [A\DataController::class, 'audit']);
 Route::get('parents/{id}', [A\DataController::class, 'parentDetail']);
+Route::post('parents/{id}/authorize-login', [A\ParentAuthorizationController::class, 'store'])->middleware('throttle:password-reset');
 Route::post('parents/{id}/reset-password', [A\DataController::class, 'resetPassword'])->middleware('throttle:password-reset');
 Route::get('students/{id}', [A\DataController::class, 'studentDetail']);
 Route::get('exams/{id}', [A\DataController::class, 'examDetail']);
@@ -91,8 +94,10 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 - `app/Http/Controllers/Admin/AuthController.php`
 - `app/Http/Controllers/Admin/DataController.php`
 - `app/Http/Controllers/Admin/ExportController.php`
+- `app/Http/Controllers/Admin/ParentAuthorizationController.php`
 - `app/Http/Controllers/Controller.php`
 - `app/Http/Controllers/ParentPortal/AuthController.php`
+- `app/Http/Controllers/ParentPortal/AuthorizedLoginController.php`
 - `app/Http/Controllers/ParentPortal/ExamController.php`
 - `app/Http/Controllers/ParentPortal/IntentionController.php`
 - `app/Http/Controllers/ParentPortal/StudentController.php`
@@ -107,6 +112,7 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 - `app/Http/Middleware/PortalSession.php`
 - `app/Policies/StudentPolicy.php`
 - `app/Services/Admin/ExcelExport.php`
+- `app/Services/Admin/ParentAuthorization.php`
 - `app/Services/Admin/PasswordReset.php`
 - `app/Services/Admin/Queries.php`
 - `app/Services/Admin/Statistics.php`
@@ -132,6 +138,7 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 
 - `resources/js/admin/Administrators.vue`
 - `resources/js/admin/App.vue`
+- `resources/js/admin/AuthorizeParentLogin.vue`
 - `resources/js/admin/Data.vue`
 - `resources/js/admin/Login.vue`
 - `resources/js/admin/Overview.vue`
@@ -141,6 +148,7 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 - `resources/js/app/Account.vue`
 - `resources/js/app/App.vue`
 - `resources/js/app/Auth.vue`
+- `resources/js/app/AuthorizedLogin.vue`
 - `resources/js/app/ExamDetail.vue`
 - `resources/js/app/ExamForm.vue`
 - `resources/js/app/Exams.vue`
@@ -162,6 +170,7 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 - `tests/Feature/AdministratorManagementTest.php`
 - `tests/Feature/ExampleTest.php`
 - `tests/Feature/GrowthSystemTest.php`
+- `tests/Feature/ParentAuthorizationTest.php`
 - `tests/Feature/RegistrationAgreementTest.php`
 - `tests/TestCase.php`
 - `tests/skills/sync-project-skill.test.mjs`

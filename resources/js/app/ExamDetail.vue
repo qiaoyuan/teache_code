@@ -2,6 +2,7 @@
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { api, errorText } from "../shared/api";
+import { readOnly } from "./state";
 import type { Exam } from "../shared/types";
 import { gradeLabel, sumScore, subtotalLabel } from "../shared/types";
 const route = useRoute(),
@@ -51,7 +52,7 @@ async function remove() {
         <section class="card form-card">
             <div class="section-head">
                 <h2>本次各科成绩</h2>
-                <RouterLink class="text-btn" :to="`/exams/${exam.id}/edit`"
+                <RouterLink v-if="!readOnly" class="text-btn" :to="`/exams/${exam.id}/edit`"
                     >编辑成绩 →</RouterLink
                 >
             </div>
@@ -100,7 +101,7 @@ async function remove() {
                 各科条形按得分率展示，便于对照本次考试；等级独立展示。
             </p>
             <p v-if="exam.note" class="note preserve">{{ exam.note }}</p>
-            <div class="form-actions">
+            <div v-if="!readOnly" class="form-actions">
                 <RouterLink class="primary" :to="`/exams/${exam.id}/edit`"
                     >修改成绩</RouterLink
                 ><button class="danger" :disabled="busy" @click="remove">

@@ -4,7 +4,7 @@ import { api, errorText } from "../shared/api";
 import type { Exam, Intention, SubjectAnalysis } from "../shared/types";
 import { gradeLabel, sumScore, subtotalLabel } from "../shared/types";
 import TrendChart from "../shared/TrendChart.vue";
-import { state, loadStudents } from "./state";
+import { state, loadStudents, readOnly } from "./state";
 const student = computed(() =>
     state.students.find((s) => s.id === state.selectedId),
 );
@@ -82,6 +82,7 @@ watch(() => state.selectedId, load);
             <h2>成长的每一步，<br />都值得好好记录。</h2>
             <p>留下一次成绩，发现一点进步。</p>
             <RouterLink
+                v-if="!readOnly"
                 class="primary"
                 :to="
                     student
@@ -107,7 +108,7 @@ watch(() => state.selectedId, load);
             <RouterLink class="action" :to="`/students/${student.id}/edit`"
                 ><span class="tile-icon">◯</span>
                 <div>
-                    <strong>学生档案</strong><small>查看与修改基本信息</small>
+                    <strong>学生档案</strong><small>{{ readOnly ? "查看基本信息" : "查看与修改基本信息" }}</small>
                 </div>
                 <span>›</span></RouterLink
             ><RouterLink
@@ -166,7 +167,7 @@ watch(() => state.selectedId, load);
                     </div>
                     <TrendChart v-if="current" :subject="current" />
                     <div v-else class="empty">
-                        还没有成绩记录<br /><RouterLink
+                        还没有成绩记录<br /><RouterLink v-if="!readOnly"
                             class="text-btn"
                             :to="`/students/${student.id}/exams/new`"
                             >录入第一次成绩 →</RouterLink
@@ -221,7 +222,7 @@ watch(() => state.selectedId, load);
                     <RouterLink
                         class="text-btn"
                         :to="`/students/${student.id}/edit`"
-                        >编辑 →</RouterLink
+                        >{{ readOnly ? "查看 →" : "编辑 →" }}</RouterLink
                     >
                 </div>
                 <section class="card">
@@ -272,16 +273,16 @@ watch(() => state.selectedId, load);
                         还没有填写意向学校
                     </div>
                 </section>
-                <div class="note">
+                <div v-if="!readOnly" class="note">
                     填报长期开放。您可以随时补充、修改孩子的档案、成绩与学校意向。
                 </div>
             </aside>
         </div></template
     >
     <div v-else-if="!error" class="card empty">
-        <h2>从一份学生档案开始</h2>
-        <p>填写孩子姓名、学校和年级，即可开始记录。</p>
-        <RouterLink to="/students/new" class="primary">添加学生</RouterLink>
+        <h2>{{ readOnly ? "该家长尚未创建学生档案" : "从一份学生档案开始" }}</h2>
+        <p>{{ readOnly ? "当前仅可查看已有资料。" : "填写孩子姓名、学校和年级，即可开始记录。" }}</p>
+        <RouterLink v-if="!readOnly" to="/students/new" class="primary">添加学生</RouterLink>
     </div>
     <p class="footer-caption">用心记录，陪伴每一步成长</p>
 </template>

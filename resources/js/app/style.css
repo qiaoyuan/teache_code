@@ -1598,3 +1598,9 @@ button:disabled {
     line-height: 1.8;
     color: var(--muted);
 }
+
+.authorization-banner { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 14px 18px; margin-top: 16px; border: 1px solid #c6d8cd; border-radius: 14px; background: #edf5ee; }
+.authorization-banner > div { flex: 1; min-width: 220px; }
+.authorization-banner small { display: block; margin-top: 6px; color: #526b5e; }
+.authorization-banner button { white-space: nowrap; }
+.authorization-entry { max-width: 520px; margin: 12vh auto; padding: 28px; }

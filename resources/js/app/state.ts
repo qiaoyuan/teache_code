@@ -1,18 +1,23 @@
-import { reactive } from "vue";
-import { api } from "../shared/api";
+import { computed, reactive } from "vue";
+import { api, ApiError } from "../shared/api";
 import type { User, Student } from "../shared/types";
 export const state = reactive({
     user: null as User | null,
     students: [] as Student[],
     selectedId: Number(sessionStorage.getItem("selected_student")) || null,
     ready: false,
+    authorizedLogin: null as { admin_username: string; expires_at: number; read_only: boolean } | null,
 });
+export const readOnly = computed(() => state.authorizedLogin?.read_only === true);
 export async function init() {
     if (state.ready) return;
     try {
-        state.user = (await api("auth/me")).user;
+        const result = await api("auth/me");
+        state.user = result.user;
+        state.authorizedLogin = result.authorized_login || null;
     } catch {
         state.user = null;
+        state.authorizedLogin = null;
     }
     state.ready = true;
 }
@@ -29,8 +34,14 @@ export function selectStudent(id: number | string | null) {
     else sessionStorage.removeItem("selected_student");
 }
 export async function logout() {
-    await api("auth/logout", "POST");
+    try {
+        await api("auth/logout", "POST");
+    } catch (e) {
+        // An expired authorization is already logged out on the server.
+        if (!(e instanceof ApiError) || e.status !== 401) throw e;
+    }
     state.user = null;
+    state.authorizedLogin = null;
     state.students = [];
     selectStudent(null);
 }

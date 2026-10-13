@@ -5,7 +5,7 @@ import { api, errorText } from "../shared/api";
 import type { Exam, SubjectAnalysis } from "../shared/types";
 import { gradeLabel, sumScore, subtotalLabel } from "../shared/types";
 import TrendChart from "../shared/TrendChart.vue";
-import { loadStudents, state, selectStudent } from "./state";
+import { loadStudents, state, selectStudent, readOnly } from "./state";
 const route = useRoute(),
     id = Number(route.params.id),
     student = computed(() => state.students.find((s) => s.id === id));
@@ -64,7 +64,7 @@ function next(n: number) {
                 {{ student?.name }} · 已记录 {{ total }} 次考试
             </p>
         </div>
-        <RouterLink class="primary" :to="`/students/${id}/exams/new`"
+        <RouterLink v-if="!readOnly" class="primary" :to="`/students/${id}/exams/new`"
             >＋ 录入成绩</RouterLink
         >
     </div>
@@ -118,7 +118,7 @@ function next(n: number) {
         <div v-if="!rows.length && !error" class="card empty">
             <h2>还没有考试记录</h2>
             <p>分数、等级都可以录入，科目也可以自由增减。</p>
-            <RouterLink class="primary" :to="`/students/${id}/exams/new`"
+            <RouterLink v-if="!readOnly" class="primary" :to="`/students/${id}/exams/new`"
                 >录入第一次成绩</RouterLink
             >
         </div>

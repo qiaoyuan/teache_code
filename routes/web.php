@@ -10,6 +10,7 @@ Route::pattern('id', '[1-9][0-9]*');
 Route::pattern('student', '[1-9][0-9]*');
 
 Route::get('/', fn () => redirect('/app/'));
+Route::get('/app/authorized-login', fn () => response()->view('app')->header('Cache-Control', 'no-store')->header('Referrer-Policy', 'no-referrer'));
 Route::get('/app/login', fn () => view('app'));
 Route::get('/app/register', fn () => view('app'));
 Route::get('/app/agreement', fn (Request $r) => view('agreement', ['embedded' => $r->boolean('embedded')]));
@@ -18,6 +19,7 @@ Route::get('/app/{path?}', fn () => view('app'))->where('path', '.*')->middlewar
 Route::get('/admin/{path?}', fn () => view('admin'))->where('path', '.*')->middleware('portal:admin');
 Route::prefix('api/v1/app')->group(function () {
     Route::get('auth/csrf', fn (Request $r) => ['csrf_token' => $r->session()->token()]);
+    Route::post('auth/authorized-login', [P\AuthorizedLoginController::class, 'store'])->middleware('throttle:authorized-login');
     Route::post('auth/register', [P\AuthController::class, 'register'])->middleware('throttle:register');
     Route::post('auth/login', [P\AuthController::class, 'login'])->middleware('throttle:login');
     Route::middleware('portal:parent')->group(function () {
@@ -55,6 +57,7 @@ Route::prefix('api/v1/admin')->group(function () {
         Route::post('administrators/{id}/password', [A\AdministratorController::class, 'password'])->middleware('throttle:password-reset');
         Route::get('audit-logs', [A\DataController::class, 'audit']);
         Route::get('parents/{id}', [A\DataController::class, 'parentDetail']);
+        Route::post('parents/{id}/authorize-login', [A\ParentAuthorizationController::class, 'store'])->middleware('throttle:password-reset');
         Route::post('parents/{id}/reset-password', [A\DataController::class, 'resetPassword'])->middleware('throttle:password-reset');
         Route::get('students/{id}', [A\DataController::class, 'studentDetail']);
         Route::get('exams/{id}', [A\DataController::class, 'examDetail']);

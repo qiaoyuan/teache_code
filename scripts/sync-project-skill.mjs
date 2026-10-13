@@ -175,7 +175,7 @@ export function runHook(payload, options = {}) {
   return payload.hook_event_name === 'PostToolUse' && result.updated ? {
     hookSpecificOutput: {
       hookEventName: 'PostToolUse',
-      additionalContext: '升学360 skill 的项目结构已同步。若本次改变业务约定，请同时更新开发设计文档、AI开发指令和 skill 手写规则。',
+      additionalContext: '升学360 skill 的项目结构已同步。若本次改变业务行为、接口约定、开发或部署流程，必须同时更新 skill 正文及相关设计文档；交付前再次运行 skill:sync 确认安装副本同步。',
     },
   } : {};
 }

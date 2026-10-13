@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { state, loadStudents, selectStudent, logout } from "./state";
+import { state, loadStudents, selectStudent, logout, readOnly } from "./state";
 import { errorText } from "../shared/api";
 import { gradeLabel } from "../shared/types";
 const router = useRouter(),
@@ -42,7 +42,7 @@ async function exit() {
                 <span class="tag">家长账号</span>
             </div>
         </div>
-        <RouterLink class="account-row" to="/change-password"
+        <RouterLink v-if="!readOnly" class="account-row" to="/change-password"
             ><span>修改登录密码</span><small>›</small></RouterLink
         >
         <div class="account-row">
@@ -62,7 +62,7 @@ async function exit() {
     </section>
     <div class="section-head">
         <h2>我的学生</h2>
-        <RouterLink class="text-btn" to="/students/new">＋ 添加学生</RouterLink>
+        <RouterLink v-if="!readOnly" class="text-btn" to="/students/new">＋ 添加学生</RouterLink>
     </div>
     <section class="card">
         <div v-for="s in state.students" :key="s.id" class="account-row">
@@ -78,13 +78,13 @@ async function exit() {
                     >{{ s.school }} · {{ gradeLabel(s.current_grade) }}</small
                 ></button
             ><RouterLink class="text-btn" :to="`/students/${s.id}/edit`"
-                >编辑</RouterLink
+                >{{ readOnly ? "查看" : "编辑" }}</RouterLink
             >
         </div>
         <div v-if="!state.students.length" class="empty">还没有学生档案</div>
     </section>
     <p v-if="error" class="error" role="alert">{{ error }}</p>
     <button class="secondary full spaced" :disabled="busy" @click="exit">
-        退出登录
+        {{ readOnly ? "退出授权查看" : "退出登录" }}
     </button>
 </template>

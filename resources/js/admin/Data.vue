@@ -10,7 +10,9 @@ import {
     sumScore,
 } from "../shared/types";
 import type { SubjectAnalysis } from "../shared/types";
+import AuthorizeParentLogin from "./AuthorizeParentLogin.vue";
 import TrendChart from "../shared/TrendChart.vue";
+const authorizationTarget = ref<{ id: number; phone: string } | null>(null);
 const route = useRoute(),
     kind = computed(() => route.path.slice(1)),
     filters = reactive({ phone: "", school: "", grade: "" }),
@@ -32,9 +34,9 @@ const titles: Record<string, string> = {
 const historic = computed(() => ["scores", "exams"].includes(kind.value));
 const description = computed(() =>
     kind.value === "parents"
-        ? "按注册手机号查看家长及名下学生，处理密码重置"
+        ? "按注册手机号查看家长及名下学生，授权查看家长前台或处理密码重置"
         : kind.value === "audit-logs"
-          ? "查看账号管理、密码修改与数据导出记录"
+          ? "查看账号管理、授权登录、密码修改与数据导出记录"
           : historic.value
             ? "按考试发生时的学校、年级筛选，保留历史信息"
             : "按学生当前就读学校、当前年级筛选",
@@ -115,6 +117,9 @@ function value(row: any, key: string): string {
                   JSON.stringify(row.details?.counts || {})
             : row.action === "administrator_created" ? "已创建管理员账号"
               : row.action === "administrator_password_changed" ? "已修改密码并使旧登录失效"
+              : row.action === "parent_authorization_issued" ? "已签发授权查看凭证，1 分钟内有效"
+              : row.action === "parent_authorization_started" ? "已进入家长前台，仅查看，有效期 30 分钟"
+              : row.action === "parent_authorization_ended" ? "已退出授权查看"
               : "临时密码已设置，要求下次登录改密";
     if (key === "target") return row.details?.username || row.details?.phone || row.details?.kind || "—";
     let v = key.split(".").reduce((o, k) => o?.[k], row);
@@ -134,7 +139,7 @@ function value(row: any, key: string): string {
     if (key === "level") return v === "first" ? "优先" : "备选";
     if (key === "must_change_password") return v ? "待修改临时密码" : "正常";
     if (key === "action")
-        return ({ parent_password_reset: "家长密码重置", data_export: "数据导出", administrator_created: "新增管理员", administrator_password_changed: "管理员密码修改" } as Record<string, string>)[v] || v;
+        return ({ parent_authorization_issued: "签发家长授权", parent_authorization_started: "授权登录家长前台", parent_authorization_ended: "退出家长授权", parent_password_reset: "家长密码重置", data_export: "数据导出", administrator_created: "新增管理员", administrator_password_changed: "管理员密码修改" } as Record<string, string>)[v] || v;
     return v == null || v === "" ? "—" : String(v);
 }
 async function load() {
@@ -255,6 +260,7 @@ async function reset() {
 }
 </script>
 <template>
+    <AuthorizeParentLogin v-if="authorizationTarget" :parent="authorizationTarget" @close="authorizationTarget = null" />
     <div class="page-heading">
         <div>
             <p class="eyebrow">RECORDS & MANAGEMENT</p>
@@ -360,7 +366,7 @@ async function reset() {
             ><el-table-column
                 v-if="kind !== 'audit-logs'"
                 label="操作"
-                :width="kind === 'parents' ? 200 : 110"
+                :width="kind === 'parents' ? 280 : 110"
                 fixed="right"
                 ><template #default="scope"
                     ><el-button link type="primary" @click="show(scope.row)"
@@ -371,7 +377,7 @@ async function reset() {
                         type="primary"
                         @click="openReset(scope.row)"
                         >重置密码</el-button
-                    ></template
+                    ><el-button v-if="kind === 'parents'" link type="primary" @click="authorizationTarget = scope.row">授权登录</el-button></template
                 ></el-table-column
             ></el-table
         >

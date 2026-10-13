@@ -3,7 +3,7 @@ import { onMounted, reactive, ref, nextTick } from "vue";
 import { useRoute } from "vue-router";
 import { api, errorText } from "../shared/api";
 import type { Intention } from "../shared/types";
-import { loadStudents, selectStudent } from "./state";
+import { loadStudents, selectStudent, readOnly } from "./state";
 const id = String(useRoute().params.id),
     rows = ref<Intention[]>([]),
     loading = ref(true),
@@ -88,7 +88,7 @@ async function remove(row: Intention) {
             <h1>学校意向</h1>
             <p class="subtitle">记录期待，也保留更多选择</p>
         </div>
-        <button class="primary" @click="open()">＋ 添加意向</button>
+        <button v-if="!readOnly" class="primary" @click="open()">＋ 添加意向</button>
     </div>
     <div class="step-note">
         意向等级只有“优先”和“备选”。可以填写多所优先学校，同一学校只保留一条有效记录。
@@ -124,7 +124,7 @@ async function remove(row: Intention) {
                     >
                 </div>
                 <p v-if="i.note" class="subtitle preserve">{{ i.note }}</p>
-                <div class="intention-actions">
+                <div v-if="!readOnly" class="intention-actions">
                     <button class="text-btn" :disabled="busy" @click="open(i)">
                         编辑</button
                     ><button class="danger" :disabled="busy" @click="remove(i)">

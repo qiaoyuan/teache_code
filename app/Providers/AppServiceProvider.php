@@ -24,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
         ));
 
         RateLimiter::for('login', fn (Request $r) => Limit::perMinute(5)->by($r->ip().'|'.$r->input('phone', $r->input('username', ''))));
+        RateLimiter::for('authorized-login', fn (Request $r) => Limit::perMinute(10)->by($r->ip()));
         RateLimiter::for('register', fn (Request $r) => Limit::perHour(6)->by($r->ip()));
         RateLimiter::for('password-reset', fn (Request $r) => Limit::perMinute(10)->by(Auth::guard('admin')->id() ?? $r->ip()));
     }
