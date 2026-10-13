@@ -81,6 +81,7 @@ h3 {
     min-height: 100dvh;
 }
 .sidebar {
+    overflow-y: auto;
     width: 230px;
     position: fixed;
     inset: 0 auto 0 0;
@@ -978,3 +979,32 @@ h3 {
         padding: 0 13px;
     }
 }
+
+.system-menu {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+}
+.system-menu-toggle {
+    width: 100%;
+    min-height: 47px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #7e8b7c;
+    font-size: 13px;
+    text-align: left;
+}
+.system-menu-toggle:hover { background: #f5f7f0; }
+.system-menu-toggle.active { color: var(--green); font-weight: 650; }
+.system-menu-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.system-menu-arrow { margin-left: auto; font-size: 22px; transition: transform .15s; }
+.system-menu-arrow.expanded { transform: rotate(90deg); }
+.system-menu-links { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+.sidebar nav .system-menu-links a { padding-left: 49px; height: 40px; }
+.sidebar > * { flex-shrink: 0; }
+.sidebar nav { margin-bottom: 24px; }

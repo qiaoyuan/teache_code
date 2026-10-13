@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref, watch } from "vue";
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
@@ -9,16 +9,24 @@ const route = useRoute(),
     router = useRouter(),
     menu = ref(false),
     busy = ref(false);
-const links = [
+const businessLinks = [
     { path: "/", label: "数据总览", icon: "▦" },
     { path: "/parents", label: "家长账号", icon: "◯" },
     { path: "/students", label: "学生档案", icon: "▤" },
     { path: "/exams", label: "考试批次", icon: "▧" },
     { path: "/scores", label: "科目成绩", icon: "▥" },
     { path: "/intentions", label: "学校意向", icon: "◇" },
+];
+const systemLinks = [
     { path: "/administrators", label: "管理员账号", icon: "⚙" },
     { path: "/audit-logs", label: "操作日志", icon: "◷" },
 ];
+const links = [...businessLinks, ...systemLinks];
+const systemActive = computed(() => systemLinks.some((link) => route.path === link.path));
+const systemOpen = ref(false);
+watch(() => route.path, () => {
+    if (systemActive.value) systemOpen.value = true;
+}, { immediate: true });
 async function logout() {
     busy.value = true;
     try {
@@ -43,7 +51,7 @@ async function logout() {
                 <div class="nav-caption">工作空间</div>
                 <nav>
                     <RouterLink
-                        v-for="link in links"
+                        v-for="link in businessLinks"
                         :key="link.path"
                         :to="link.path"
                         :class="{ active: route.path === link.path }"
@@ -51,6 +59,27 @@ async function logout() {
                         ><b>{{ link.icon }}</b
                         >{{ link.label }}</RouterLink
                     >
+                    <div class="system-menu">
+                        <button
+                            class="system-menu-toggle"
+                            :class="{ active: systemActive }"
+                            :aria-expanded="systemOpen"
+                            aria-controls="system-settings-links"
+                            @click="systemOpen = !systemOpen"
+                        >
+                            <b aria-hidden="true">⚙</b><span>系统设置</span>
+                            <span class="system-menu-arrow" :class="{ expanded: systemOpen }" aria-hidden="true">›</span>
+                        </button>
+                        <div v-show="systemOpen" id="system-settings-links" class="system-menu-links">
+                            <RouterLink
+                                v-for="link in systemLinks"
+                                :key="link.path"
+                                :to="link.path"
+                                :class="{ active: route.path === link.path }"
+                                @click="menu = false"
+                            >{{ link.label }}</RouterLink>
+                        </div>
+                    </div>
                 </nav>
                 <div class="sidebar-note">
                     <span>填报长期开放</span>
@@ -76,7 +105,8 @@ async function logout() {
                     ><span
                         >工作空间 <i>/</i>
                         {{
-                            links.find((l) => l.path === route.path)?.label
+                            (systemActive ? "系统设置 / " : "") +
+                            (links.find((l) => l.path === route.path)?.label || "")
                         }}</span
                     >
                     <div>

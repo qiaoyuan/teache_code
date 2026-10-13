@@ -59,3 +59,7 @@ id 必须位于业务表首列；created_at、updated_at、deleted_at（存在�
 - `administrators.auth_version` 为 unsigned integer，默认 0，以新增迁移保留现有账号及密码。改密递增版本并按 portal=admin、user_id 清除目标会话，拦截旧版本会话；修改自己密码后退出并重新登录，不影响同数字 ID 的家长会话。
 - 审计记录操作者、目标账号、IP、时间；不记录密码。新增接口：GET/POST `/api/v1/admin/administrators`，POST `/api/v1/admin/administrators/{id}/password`。
 - 升级需先执行 `php artisan migrate --force`，再构建前端、刷新配置/路由/视图缓存。修改初始管理员密码通过此页面进行，不通过 .env 的 ADMIN_PASSWORD 覆盖已有账号。
+
+### 后台菜单组织
+
+后台导航：数据总览、家长账号、学生档案、考试批次、科目成绩、学校意向依次平铺；导航列表最后放可展开的“系统设置”，内含“管理员账号”和“操作日志”。进入系统页面时自动展开并显示对应面包屑，窄屏导航支持滚动。

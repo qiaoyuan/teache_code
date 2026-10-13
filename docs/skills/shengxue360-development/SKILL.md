@@ -15,6 +15,8 @@ description: "维护升学360成绩记录与招生意向采集项目（teacher�
 
 ## 稳定业务约定
 
+- 后台导航：数据总览、家长账号、学生档案、考试批次、科目成绩、学校意向依次平铺；导航列表最后放可展开的“系统设置”，内含“管理员账号”和“操作日志”。进入系统页面时自动展开并显示对应面包屑，窄屏导航支持滚动。
+
 - 后台管理员账号页支持新增和修改密码，管理员同权；写操作验证操作者密码并审计。管理员 auth_version 默认 0，改密递增并只清除目标 admin 会话，修改自己密码后退出；新建账号统一小写，密码不可展示。
 
 - 正式部署采用 `www.shengxue360.com` 家长端、`admin.shengxue360.com` 后台，根域 `shengxue360.com` 跳转 www；保留现有 `/app/`、`/admin/` 路径，域名首页分别跳转对应路径。生产 APP_URL 为 `https://www.shengxue360.com`，SESSION_DOMAIN=null，使 Cookie 按主机隔离。
@@ -57,7 +59,7 @@ description: "维护升学360成绩记录与招生意向采集项目（teacher�
 
 <!-- project-state:start -->
 
-当前设计 V1.7；10 个迁移；112 个受监测源文件。源指纹：`21307492b63fa091`。
+当前设计 V1.7；10 个迁移；112 个受监测源文件。源指纹：`0f88fd96843b37fa`。
 详见 [项目结构快照](references/project-state.md)。本段由 hook 更新。
 
 <!-- project-state:end -->
