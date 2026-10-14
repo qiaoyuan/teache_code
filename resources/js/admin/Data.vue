@@ -56,6 +56,7 @@ const columns = computed(
                 ["gender", "性别", 80],
                 ["school", "学校全称", 200],
                 ["classroom", "班级", 180],
+                ["admitted_school", "已被录取学校", 200],
                 ["contact_phone", "联系手机号", 170],
                 ["exams_count", "考试次数", 100],
                 ["intentions_count", "意向数", 100],
@@ -413,6 +414,8 @@ async function reset() {
                             ><template #default="s">{{
                                 classLabel(s.row)
                             }}</template></el-table-column
+                        ><el-table-column label="已被录取学校"
+                            ><template #default="s">{{ s.row.admitted_school || "—" }}</template></el-table-column
                         ></el-table
                     ></template
                 ><template v-else-if="detailType === 'student'"
@@ -429,7 +432,8 @@ async function reset() {
                             detail.contact_phone
                         }}</el-descriptions-item
                         ><el-descriptions-item label="学校全称">{{ detail.school }}</el-descriptions-item
-                        ><el-descriptions-item label="班级">{{ classLabel(detail) }}</el-descriptions-item></el-descriptions>
+                        ><el-descriptions-item label="班级">{{ classLabel(detail) }}</el-descriptions-item
+                        ><el-descriptions-item label="已被录取学校">{{ detail.admitted_school || "—" }}</el-descriptions-item></el-descriptions>
                     <h3>单科成绩分析</h3>
                     <el-select
                         v-if="detailSubjects.length"

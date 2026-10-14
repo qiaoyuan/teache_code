@@ -13,6 +13,7 @@ export interface Student {
     name: string;
     gender: string;
     school: string;
+    admitted_school: string | null;
     class_number: number | null;
     entry_year: number | null;
     entry_grade: string | null;
@@ -94,6 +95,17 @@ export const gradeOptions = Object.entries({
 }).map(([value, label]) => ({ value, label }));
 export const gradeLabel = (v: string) =>
     gradeOptions.find((g) => g.value === v)?.label || v;
+export const admittedSchoolOptions = [
+    "宜宾市一中",
+    "宜宾市三中",
+    "宜宾市四中",
+    "宜宾市五中",
+    "宜宾市六中",
+    "三江成外k12",
+    "叙州二中巴蜀班",
+    "凉水井中学",
+    "三江一中",
+];
 export const classGradeLabel = (grade: string) => gradeLabel(grade).replace(/^小学/, "");
 export const classLabel = (student: Pick<Student, "current_grade" | "class_number">) =>
     `${classGradeLabel(student.current_grade)}${student.current_grade.startsWith("P") ? "" : " "}${student.class_number == null ? "（班号未填写）" : student.class_number + "班"}`;

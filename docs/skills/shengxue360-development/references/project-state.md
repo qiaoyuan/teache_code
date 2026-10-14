@@ -1,8 +1,8 @@
 # 项目结构快照（自动生成）
 
 项目目录：`/Users/qiaoyuan/www/php/teache_code`
-设计版本：V1.10
-源文件指纹：`17a3db08b6275dca6f90c4e20cf25c1afb3609bb6a35b62affb7af614edf24a9`
+设计版本：V1.11
+源文件指纹：`9a4954fccb247b9a74d292eb3952dd43571a53bbd2ed02cb9a73e7ef51ec9c5a`
 
 来源是当前磁盘文件，不代表测试通过、需求确认或部署完成。不读取数据库、环境凭据或聊天。
 
@@ -133,6 +133,7 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 - `database/migrations/2026_10_13_000001_add_registration_agreement_to_parents.php`
 - `database/migrations/2026_10_13_000002_add_auth_version_to_administrators.php`
 - `database/migrations/2026_10_13_000003_add_class_number_to_students.php`
+- `database/migrations/2026_10_14_000001_add_admitted_school_to_students.php`
 - `database/seeders/DatabaseSeeder.php`
 
 ## 前端与模板
@@ -173,6 +174,7 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 - `tests/Feature/GrowthSystemTest.php`
 - `tests/Feature/ParentAuthorizationTest.php`
 - `tests/Feature/RegistrationAgreementTest.php`
+- `tests/Feature/StudentAdmissionTest.php`
 - `tests/Feature/StudentClassTest.php`
 - `tests/TestCase.php`
 - `tests/skills/sync-project-skill.test.mjs`

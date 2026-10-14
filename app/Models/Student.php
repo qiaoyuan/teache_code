@@ -9,6 +9,8 @@ class Student extends Model
 {
     use SoftDeletes;
 
+    protected $attributes = ['admitted_school' => null];
+
     protected function casts(): array
     {
         return ['id' => 'integer', 'parent_id' => 'integer', 'class_number' => 'integer'];

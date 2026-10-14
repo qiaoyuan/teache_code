@@ -62,7 +62,7 @@ class ExcelExport
                     $first = false;
                     $sheet->setName(['students' => '学生档案', 'scores' => '科目成绩', 'intentions' => '学校意向'][$type]);
                     $headers = match ($type) {
-                        'students' => ['学生ID', '学生姓名', '性别', '学校全称', '班级', '联系手机号', '注册家长手机号', '考试批次数', '意向数'],'scores' => ['成绩ID', '注册家长手机号', '学生姓名', '考试名称', '考试日期', '考试时学校', '考试时年级', '科目', '记录方式', '分数', '等级', '考试备注'],'intentions' => ['意向ID', '注册家长手机号', '学生姓名', '学校全称', '班级', '意向学校', '意向等级', '备注']
+                        'students' => ['学生ID', '学生姓名', '性别', '学校全称', '班级', '联系手机号', '注册家长手机号', '考试批次数', '意向数', '已被录取学校'],'scores' => ['成绩ID', '注册家长手机号', '学生姓名', '考试名称', '考试日期', '考试时学校', '考试时年级', '科目', '记录方式', '分数', '等级', '考试备注'],'intentions' => ['意向ID', '注册家长手机号', '学生姓名', '学校全称', '班级', '意向学校', '意向等级', '备注']
                     };
                     $sheet->setColumnWidthForRange(20, 1, count($headers));
                     $sheet->setColumnWidth(40, 1);
@@ -74,7 +74,7 @@ class ExcelExport
                     }
                     foreach ($query->lazy(500) as $record) {
                         $values = match ($type) {
-                            'students' => [$record->id, $record->name, ['male' => '男', 'female' => '女', 'unspecified' => '未填写'][$record->gender], $record->school, $this->classroom($record), $record->contact_phone, $record->parent->phone, (int) $record->exams_count, (int) $record->intentions_count],
+                            'students' => [$record->id, $record->name, ['male' => '男', 'female' => '女', 'unspecified' => '未填写'][$record->gender], $record->school, $this->classroom($record), $record->contact_phone, $record->parent->phone, (int) $record->exams_count, (int) $record->intentions_count, $record->admitted_school],
                             'scores' => [$record->id, $record->exam->student->parent->phone, $record->exam->student->name, $record->exam->title, $record->exam->exam_date->toDateString(), $record->exam->school_at_exam, $this->grade($record->exam->grade_at_exam), $record->name, $record->mode === 'score' ? '分数' : '等级', $record->mode === 'score' ? (float) $record->score : '', $record->grade, $record->exam->note],
                             'intentions' => [$record->id, $record->student->parent->phone, $record->student->name, $record->student->school, $this->classroom($record->student), $record->school, $record->level === 'first' ? '优先' : '备选', $record->note],
                         };

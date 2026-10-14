@@ -15,7 +15,7 @@ class StudentRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        foreach (['name', 'school'] as $key) {
+        foreach (['name', 'school', 'admitted_school'] as $key) {
             if (is_string($this->input($key))) {
                 $this->merge([$key => Text::clean($this->input($key))]);
             }
@@ -29,6 +29,6 @@ class StudentRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['name' => 'required|string|max:50', 'gender' => ['required', Rule::in(['male', 'female', 'unspecified'])], 'school' => 'required|string|max:160', 'class_number' => ['required', 'integer', 'between:1,99', 'regex:/\A[0-9]+\z/'], 'entry_year' => 'nullable|integer|min:1990|max:'.(now()->year + 1), 'entry_grade' => ['nullable', Rule::in(Text::grades())], 'current_grade' => ['required', Rule::in(Text::grades())], 'contact_phone' => 'required|regex:/^1[3-9][0-9]{9}$/'];
+        return ['name' => 'required|string|max:50', 'gender' => ['required', Rule::in(['male', 'female', 'unspecified'])], 'school' => 'required|string|max:160', 'admitted_school' => ['nullable', 'string', Rule::in(Text::admittedSchools())], 'class_number' => ['required', 'integer', 'between:1,99', 'regex:/\A[0-9]+\z/'], 'entry_year' => 'nullable|integer|min:1990|max:'.(now()->year + 1), 'entry_grade' => ['nullable', Rule::in(Text::grades())], 'current_grade' => ['required', Rule::in(Text::grades())], 'contact_phone' => 'required|regex:/^1[3-9][0-9]{9}$/'];
     }
 }

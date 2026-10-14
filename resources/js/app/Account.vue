@@ -76,7 +76,7 @@ async function exit() {
                 <strong>{{ s.name }}</strong
                 ><small
                     >{{ s.school }} · {{ classLabel(s) }}</small
-                ></button
+                ><small v-if="s.admitted_school">已被录取学校：{{ s.admitted_school }}</small></button
             ><RouterLink class="text-btn" :to="`/students/${s.id}/edit`"
                 >{{ readOnly ? "查看" : "编辑" }}</RouterLink
             >

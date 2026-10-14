@@ -2,7 +2,7 @@
 import { onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { api, errorText } from "../shared/api";
-import { gradeOptions, classGradeLabel } from "../shared/types";
+import { gradeOptions, classGradeLabel, admittedSchoolOptions } from "../shared/types";
 import { loadStudents, selectStudent, state, readOnly } from "./state";
 const route = useRoute(),
     router = useRouter(),
@@ -11,6 +11,7 @@ const form = reactive({
     name: "",
     gender: "unspecified",
     school: "",
+    admitted_school: null as string | null,
     class_number: "",
     current_grade: "P1",
     contact_phone: state.user?.phone || "",
@@ -40,6 +41,7 @@ async function save() {
                 name: form.name,
                 gender: form.gender,
                 school: form.school,
+                admitted_school: form.admitted_school,
                 current_grade: form.current_grade,
                 class_number: form.class_number,
                 contact_phone: form.contact_phone,
@@ -124,6 +126,15 @@ async function remove() {
                 <span aria-hidden="true">班</span>
             </span>
             <small id="class-number-help" class="class-help">班号为 1–99 的整数</small>
+        </label>
+        <label class="field">
+            <span>已被录取学校（选填）</span>
+            <select :disabled="readOnly" v-model="form.admitted_school">
+                <option :value="null">暂不填写</option>
+                <option v-for="school in admittedSchoolOptions" :key="school" :value="school">
+                    {{ school }}
+                </option>
+            </select>
         </label>
         <label class="field"
             ><span>家长联系手机号</span
