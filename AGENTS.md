@@ -2,6 +2,8 @@
 
 @/Users/qiaoyuan/.codex/RTK.md
 
+本机开发目录固定为 `/Users/qiaoyuan/www/php/teache_code`。不要在 `/Users/qiaoyuan/Documents/ChatGPT/teacher` 云盘副本中继续修改；若当前工作目录不同，先切换到本目录。
+
 修改前读取 `docs/skills/shengxue360-development/SKILL.md`，当前结构见其 `references/project-state.md`。
 
 以用户最后确认的决定为准；新增业务约定同步 `docs/开发设计文档.md`、`docs/AI开发指令.md` 和 skill 的手写部分。正式源码为现有 Laravel + Vue 项目，静态原型只作参考。

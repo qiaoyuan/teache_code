@@ -1,8 +1,8 @@
 # 项目结构快照（自动生成）
 
-项目目录：`/Users/qiaoyuan/Documents/ChatGPT/teacher`
+项目目录：`/Users/qiaoyuan/www/php/teache_code`
 设计版本：V1.9
-源文件指纹：`295ffdb66adf72d581ebbc1f2890e4d41a8a27d8ddea425b79d186189984987e`
+源文件指纹：`7a2dd3eb9e5074c8a04160b3c4d901cb0cb190cfc0c58ad2afb812011fc89eec`
 
 来源是当前磁盘文件，不代表测试通过、需求确认或部署完成。不读取数据库、环境凭据或聊天。
 

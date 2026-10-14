@@ -9,6 +9,8 @@ description: "维护升学360成绩记录与招生意向采集项目（teacher�
 
 ## 开发依据
 
+- 本机开发目录固定为 `/Users/qiaoyuan/www/php/teache_code`，不再使用 Documents 下的云盘副本。
+
 - 在项目根目录阅读 `docs/开发设计文档.md`；实施和验收细节查 `docs/AI开发指令.md`、`README.md`。
 - 冲突以用户最后确认的决定为准。确认的新规则同时更新设计文档和本文件的手写部分。
 - 正式系统使用现有 Laravel + Vue 3 / TypeScript；家长 `/app/`、后台 `/admin/`、统一 `public/index.php` 入口。`parent-h5` 与在线预览是旧静态原型。
@@ -63,7 +65,7 @@ description: "维护升学360成绩记录与招生意向采集项目（teacher�
 
 <!-- project-state:start -->
 
-当前设计 V1.9；11 个迁移；120 个受监测源文件。源指纹：`295ffdb66adf72d5`。
+当前设计 V1.9；11 个迁移；120 个受监测源文件。源指纹：`7a2dd3eb9e5074c8`。
 详见 [项目结构快照](references/project-state.md)。本段由 hook 更新。
 
 <!-- project-state:end -->
