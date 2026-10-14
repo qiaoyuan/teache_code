@@ -4,7 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { api, errorText } from "../shared/api";
 import type { Subject } from "../shared/types";
 import { gradeOptions, cleanSubject } from "../shared/types";
-import { state, loadStudents, selectStudent } from "./state";
+import { loadStudents, selectStudent } from "./state";
 const route = useRoute(),
     router = useRouter(),
     id = String(route.params.id || "");
@@ -59,7 +59,14 @@ async function save() {
         const d = await api(
             editing ? `exams/${id}` : `students/${studentId.value}/exams`,
             editing ? "PUT" : "POST",
-            { ...form, subjects: form.subjects.map(cleanSubject) },
+            {
+                title: form.title,
+                exam_date: form.exam_date,
+                grade_at_exam: form.grade_at_exam,
+                note: form.note,
+                version: form.version,
+                subjects: form.subjects.map(cleanSubject),
+            },
         );
         router.replace(`/exams/${d.data.id}`);
     } catch (e) {
@@ -111,12 +118,12 @@ async function save() {
                     </select></label
                 >
             </div>
-            <label class="field"
-                ><span>考试时就读学校</span
-                ><input v-model="form.school_at_exam" maxlength="160" required
-            /></label>
             <p class="hint">
-                此处保存本次考试的学校与年级，以后修改档案不会改变它们。
+                考试时学校：{{ form.school_at_exam || "未填写" }}。{{
+                    editing
+                        ? "保留本次考试记录的学校。"
+                        : "自动使用学生档案中的学校，无需重复填写。"
+                }}
             </p>
         </section>
         <div class="section-head">

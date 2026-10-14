@@ -6,6 +6,7 @@ import { api, errorText, download } from "../shared/api";
 import {
     gradeOptions,
     gradeLabel,
+    classLabel,
     subtotalLabel,
     sumScore,
 } from "../shared/types";
@@ -53,9 +54,8 @@ const columns = computed(
                 ["name", "学生姓名", 130],
                 ["parent.phone", "注册家长手机号", 170],
                 ["gender", "性别", 80],
-                ["school", "当前就读学校", 200],
-                ["current_grade", "当前年级", 130],
-                ["entry_year", "入学年份", 110],
+                ["school", "学校全称", 200],
+                ["classroom", "班级", 180],
                 ["contact_phone", "联系手机号", 170],
                 ["exams_count", "考试次数", 100],
                 ["intentions_count", "意向数", 100],
@@ -88,7 +88,7 @@ const columns = computed(
                 ["student.parent.phone", "注册家长手机号", 170],
                 ["student.name", "学生姓名", 130],
                 ["student.school", "当前学校", 200],
-                ["student.current_grade", "当前年级", 130],
+                ["student.classroom", "班级", 180],
                 ["school", "意向学校", 220],
                 ["level", "意向等级", 110],
                 ["note", "备注", 220],
@@ -121,6 +121,8 @@ function value(row: any, key: string): string {
               : row.action === "parent_authorization_ended" ? "已退出授权查看"
               : "临时密码已设置，要求下次登录改密";
     if (key === "target") return row.details?.username || row.details?.phone || row.details?.kind || "—";
+    if (key === "classroom") return classLabel(row);
+    if (key === "student.classroom") return classLabel(row.student);
     let v = key.split(".").reduce((o, k) => o?.[k], row);
     if (key === "created_at")
         return new Date(v).toLocaleString("zh-CN", {
@@ -414,9 +416,9 @@ async function reset() {
                         /><el-table-column
                             prop="school"
                             label="学校"
-                        /><el-table-column label="年级"
+                        /><el-table-column label="班级"
                             ><template #default="s">{{
-                                gradeLabel(s.row.current_grade)
+                                classLabel(s.row)
                             }}</template></el-table-column
                         ></el-table
                     ></template
@@ -424,7 +426,7 @@ async function reset() {
                     ><h2>{{ detail.name }}</h2>
                     <p class="muted">
                         {{ detail.school }} ·
-                        {{ gradeLabel(detail.current_grade) }}
+                        {{ classLabel(detail) }}
                     </p>
                     <el-descriptions :column="2" border
                         ><el-descriptions-item label="注册家长">{{
@@ -433,13 +435,8 @@ async function reset() {
                         ><el-descriptions-item label="联系手机号">{{
                             detail.contact_phone
                         }}</el-descriptions-item
-                        ><el-descriptions-item label="入学年份">{{
-                            detail.entry_year
-                        }}</el-descriptions-item
-                        ><el-descriptions-item label="入学年级">{{
-                            gradeLabel(detail.entry_grade)
-                        }}</el-descriptions-item></el-descriptions
-                    >
+                        ><el-descriptions-item label="学校全称">{{ detail.school }}</el-descriptions-item
+                        ><el-descriptions-item label="班级">{{ classLabel(detail) }}</el-descriptions-item></el-descriptions>
                     <h3>单科成绩分析</h3>
                     <el-select
                         v-if="detailSubjects.length"

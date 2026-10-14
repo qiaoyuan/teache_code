@@ -40,7 +40,7 @@ class Records
     {
         return DB::transaction(function () use ($student, $data, $exam) {
             // Serialize all writes/deletes for a student so deleted descendants cannot reappear.
-            Student::whereKey($student->id)->lockForUpdate()->firstOrFail();
+            $student = Student::whereKey($student->id)->lockForUpdate()->firstOrFail();
             $subjects = $data['subjects'];
             unset($data['subjects']);
             if ($exam) {
@@ -48,10 +48,12 @@ class Records
                 if ((int) $data['version'] !== $exam->version) {
                     throw new HttpResponseException(response()->json(['error' => ['code' => 'VERSION_CONFLICT', 'message' => '考试已被其他设备修改，请刷新后重试']], 409));
                 }
+                $data['school_at_exam'] = $exam->school_at_exam;
                 unset($data['version']);
                 $exam->update([...$data, 'version' => $exam->version + 1]);
                 $exam->subjects()->get()->each->delete();
             } else {
+                $data['school_at_exam'] = $student->school;
                 unset($data['version']);
                 $exam = $student->exams()->create($data);
             }

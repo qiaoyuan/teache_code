@@ -3,7 +3,7 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { state, loadStudents, selectStudent, logout, readOnly } from "./state";
 import { errorText } from "../shared/api";
-import { gradeLabel } from "../shared/types";
+import { classLabel } from "../shared/types";
 const router = useRouter(),
     error = ref(""),
     busy = ref(false);
@@ -75,7 +75,7 @@ async function exit() {
             >
                 <strong>{{ s.name }}</strong
                 ><small
-                    >{{ s.school }} · {{ gradeLabel(s.current_grade) }}</small
+                    >{{ s.school }} · {{ classLabel(s) }}</small
                 ></button
             ><RouterLink class="text-btn" :to="`/students/${s.id}/edit`"
                 >{{ readOnly ? "查看" : "编辑" }}</RouterLink

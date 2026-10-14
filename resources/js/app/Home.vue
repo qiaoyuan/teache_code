@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { api, errorText } from "../shared/api";
 import type { Exam, Intention, SubjectAnalysis } from "../shared/types";
-import { gradeLabel, sumScore, subtotalLabel } from "../shared/types";
+import { classLabel, gradeLabel, sumScore, subtotalLabel } from "../shared/types";
 import TrendChart from "../shared/TrendChart.vue";
 import { state, loadStudents, readOnly } from "./state";
 const student = computed(() =>
@@ -70,7 +70,7 @@ watch(() => state.selectedId, load);
                     student
                         ? student.school +
                           " · " +
-                          gradeLabel(student.current_grade)
+                          classLabel(student)
                         : "先建立孩子的档案，再录入成绩和学校意向"
                 }}
             </p>
@@ -231,19 +231,13 @@ watch(() => state.selectedId, load);
                         <div>
                             <h3>{{ student.name }}</h3>
                             <span class="tag">{{
-                                gradeLabel(student.current_grade)
+                                classLabel(student)
                             }}</span>
                         </div>
                     </div>
                     <div class="profile-info">
-                        <div><small>就读学校</small>{{ student.school }}</div>
-                        <div>
-                            <small>入学年份</small>{{ student.entry_year }} 年
-                        </div>
-                        <div>
-                            <small>入学年级</small
-                            >{{ gradeLabel(student.entry_grade) }}
-                        </div>
+                        <div><small>学校全称</small>{{ student.school }}</div>
+                        <div><small>班级</small>{{ classLabel(student) }}</div>
                         <div>
                             <small>联系电话</small>{{ student.contact_phone }}
                         </div>
@@ -281,7 +275,7 @@ watch(() => state.selectedId, load);
     >
     <div v-else-if="!error" class="card empty">
         <h2>{{ readOnly ? "该家长尚未创建学生档案" : "从一份学生档案开始" }}</h2>
-        <p>{{ readOnly ? "当前仅可查看已有资料。" : "填写孩子姓名、学校和年级，即可开始记录。" }}</p>
+        <p>{{ readOnly ? "当前仅可查看已有资料。" : "填写孩子姓名、学校全称和班级，即可开始记录。" }}</p>
         <RouterLink v-if="!readOnly" to="/students/new" class="primary">添加学生</RouterLink>
     </div>
     <p class="footer-caption">用心记录，陪伴每一步成长</p>

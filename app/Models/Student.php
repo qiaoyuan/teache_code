@@ -11,7 +11,7 @@ class Student extends Model
 
     protected function casts(): array
     {
-        return ['id' => 'integer', 'parent_id' => 'integer'];
+        return ['id' => 'integer', 'parent_id' => 'integer', 'class_number' => 'integer'];
     }
 
     protected $guarded = [];

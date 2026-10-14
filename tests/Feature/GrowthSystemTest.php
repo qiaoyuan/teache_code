@@ -65,7 +65,7 @@ class GrowthSystemTest extends TestCase
     public function test_password_changes_only_revoke_parent_sessions_when_admin_id_overlaps(): void
     {
         $parent = $this->parent();
-        $admin = $this->admin();
+        $admin = Administrator::create(['id' => $parent->id, 'username' => 'overlapping_admin', 'password' => 'Admin123']);
         $this->assertSame($parent->id, $admin->id);
         foreach (['parent', 'admin'] as $portal) {
             DB::table('sessions')->insert(['id' => $portal.'_session', 'portal' => $portal, 'user_id' => $parent->id, 'payload' => '', 'last_activity' => time()]);
@@ -103,7 +103,7 @@ class GrowthSystemTest extends TestCase
 
     private function studentData(array $extra = []): array
     {
-        return [...['name' => '测试学生', 'gender' => 'female', 'school' => '实验小学', 'entry_year' => 2023, 'entry_grade' => 'P1', 'current_grade' => 'P4', 'contact_phone' => '13900000001'], ...$extra];
+        return [...['name' => '测试学生', 'gender' => 'female', 'school' => '实验小学', 'class_number' => '3', 'entry_year' => 2023, 'entry_grade' => 'P1', 'current_grade' => 'P4', 'contact_phone' => '13900000001'], ...$extra];
     }
 
     private function student(ParentAccount $p, array $extra = []): Student
@@ -368,7 +368,7 @@ class GrowthSystemTest extends TestCase
         $this->assertCount(26, $e['sheets']['学生档案']);
         $this->assertCount(3, $e['sheets']);
         $row = collect($e['sheets']['学生档案'])->first(fn ($r) => ($r[1] ?? '') === '=HYPERLINK("evil","click")');
-        $this->assertSame('13800000001', $row[8]);
+        $this->assertSame('13800000001', $row[6]);
         $this->assertStringNotContainsString('<f>', $e['xml']);
         $this->assertEquals(80, $e['sheets']['科目成绩'][1][9]);
     }
@@ -410,7 +410,7 @@ class GrowthSystemTest extends TestCase
             foreach (['学生档案', '科目成绩', '学校意向'] as $sheet) {
                 $rows = array_slice($export['sheets'][$sheet], 1);
                 $actual = array_map(fn ($row) => $sheet === '学生档案'
-                    ? [$row[0], $row[8], $row[1]]
+                    ? [$row[0], $row[6], $row[1]]
                     : [$row[0], $row[1], $row[2]], $rows);
                 $ordered = array_merge(...array_column($expected, $sheet));
                 if ($filters !== []) {
@@ -419,7 +419,7 @@ class GrowthSystemTest extends TestCase
                 $this->assertSame($ordered, $actual, $sheet);
             }
             foreach (array_slice($export['sheets']['学生档案'], 1) as $row) {
-                $this->assertSame([1, 1], [$row[9], $row[10]]);
+                $this->assertSame([1, 1], [$row[7], $row[8]]);
             }
         }
     }

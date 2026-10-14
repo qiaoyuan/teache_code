@@ -2,7 +2,7 @@
 import { onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { api, errorText } from "../shared/api";
-import { gradeOptions } from "../shared/types";
+import { gradeOptions, classGradeLabel } from "../shared/types";
 import { loadStudents, selectStudent, state, readOnly } from "./state";
 const route = useRoute(),
     router = useRouter(),
@@ -11,8 +11,7 @@ const form = reactive({
     name: "",
     gender: "unspecified",
     school: "",
-    entry_year: new Date().getFullYear(),
-    entry_grade: "P1",
+    class_number: "",
     current_grade: "P1",
     contact_phone: state.user?.phone || "",
 });
@@ -37,7 +36,14 @@ async function save() {
         const d = await api(
             id ? `students/${id}` : "students",
             id ? "PUT" : "POST",
-            form,
+            {
+                name: form.name,
+                gender: form.gender,
+                school: form.school,
+                current_grade: form.current_grade,
+                class_number: form.class_number,
+                contact_phone: form.contact_phone,
+            },
         );
         await loadStudents();
         selectStudent(d.data.id);
@@ -66,73 +72,63 @@ async function remove() {
 <template>
     <div class="page-title">
         <RouterLink to="/" class="text-btn">← 返回首页</RouterLink>
-        <h1>{{ readOnly ? "学生档案" : id ? "编辑学生档案" : "建立学生档案" }}</h1>
+        <h1>
+            {{ readOnly ? "学生档案" : id ? "编辑学生档案" : "建立学生档案" }}
+        </h1>
         <p class="subtitle">一个家长账号可以管理多个孩子的资料</p>
     </div>
     <p v-if="loading" class="empty">正在加载档案…</p>
     <form v-else class="card form-card" @submit.prevent="save">
         <label class="field"
             ><span>学生姓名</span
-            ><input :disabled="readOnly"
+            ><input
+                :disabled="readOnly"
                 v-model="form.name"
                 maxlength="50"
                 placeholder="请输入孩子的姓名"
                 required
         /></label>
-        <div class="form-grid">
-            <label class="field"
-                ><span>性别</span
-                ><select :disabled="readOnly" v-model="form.gender">
-                    <option value="unspecified">暂不填写</option>
-                    <option value="male">男</option>
-                    <option value="female">女</option>
-                </select></label
-            ><label class="field"
-                ><span>当前年级</span
-                ><select :disabled="readOnly" v-model="form.current_grade">
-                    <option
-                        v-for="g in gradeOptions"
-                        :key="g.value"
-                        :value="g.value"
-                    >
-                        {{ g.label }}
-                    </option>
-                </select></label
-            >
-        </div>
         <label class="field"
-            ><span>当前就读学校</span
-            ><input :disabled="readOnly"
+            ><span>性别</span
+            ><select :disabled="readOnly" v-model="form.gender">
+                <option value="unspecified">暂不填写</option>
+                <option value="male">男</option>
+                <option value="female">女</option>
+            </select></label
+        >
+        <label class="field"
+            ><span>学校全称</span
+            ><input
+                :disabled="readOnly"
                 v-model="form.school"
                 maxlength="160"
-                placeholder="请输入完整学校名称"
+                placeholder="xx区（县）xx学校"
                 required
         /></label>
-        <div class="form-grid">
-            <label class="field"
-                ><span>入学年份</span
-                ><input :disabled="readOnly"
-                    v-model.number="form.entry_year"
-                    type="number"
-                    min="1990"
-                    :max="new Date().getFullYear() + 1"
-                    required /></label
-            ><label class="field"
-                ><span>入学年级</span
-                ><select :disabled="readOnly" v-model="form.entry_grade">
-                    <option
-                        v-for="g in gradeOptions"
-                        :key="g.value"
-                        :value="g.value"
-                    >
-                        {{ g.label }}
-                    </option>
-                </select></label
-            >
-        </div>
+        <label class="field">
+            <span>年级</span>
+            <select class="student-grade-select" :disabled="readOnly" v-model="form.current_grade" required>
+                <option v-for="g in gradeOptions" :key="g.value" :value="g.value">
+                    {{ classGradeLabel(g.value) }}
+                </option>
+            </select>
+        </label>
+        <label class="field">
+            <span>班级</span>
+            <span class="class-number">
+                <input :disabled="readOnly" v-model="form.class_number"
+                    type="text" inputmode="numeric"
+                    pattern="[1-9][0-9]?" maxlength="2"
+                    title="请输入 1–99 的整数" placeholder="请输入班号，例如 3"
+                    aria-describedby="class-number-help" required />
+                <span aria-hidden="true">班</span>
+            </span>
+            <small id="class-number-help" class="class-help">班号为 1–99 的整数</small>
+        </label>
         <label class="field"
             ><span>家长联系手机号</span
-            ><input :disabled="readOnly"
+            ><input
+                :disabled="readOnly"
                 v-model="form.contact_phone"
                 type="tel"
                 inputmode="numeric"
@@ -141,7 +137,7 @@ async function remove() {
                 required
         /></label>
         <p class="hint">
-            联系手机号可以与登录手机号不同。修改当前学校和年级，不会改变历史考试资料。
+            联系手机号可以与登录手机号不同。修改学校和班级，不会改变历史考试资料。
         </p>
         <p v-if="error" role="alert" class="error">{{ error }}</p>
         <div v-if="!readOnly" class="form-actions">

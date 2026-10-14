@@ -1,8 +1,8 @@
 # 项目结构快照（自动生成）
 
 项目目录：`/Users/qiaoyuan/Documents/ChatGPT/teacher`
-设计版本：V1.8
-源文件指纹：`6d17bc1bb46927913867ee7c8d08f96d4be44eb392c4dd7f8d9ef225da66acc8`
+设计版本：V1.9
+源文件指纹：`295ffdb66adf72d581ebbc1f2890e4d41a8a27d8ddea425b79d186189984987e`
 
 来源是当前磁盘文件，不代表测试通过、需求确认或部署完成。不读取数据库、环境凭据或聊天。
 
@@ -132,6 +132,7 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 - `database/migrations/2026_10_12_000005_put_id_first_and_use_datetime.php`
 - `database/migrations/2026_10_13_000001_add_registration_agreement_to_parents.php`
 - `database/migrations/2026_10_13_000002_add_auth_version_to_administrators.php`
+- `database/migrations/2026_10_13_000003_add_class_number_to_students.php`
 - `database/seeders/DatabaseSeeder.php`
 
 ## 前端与模板
@@ -172,6 +173,7 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 - `tests/Feature/GrowthSystemTest.php`
 - `tests/Feature/ParentAuthorizationTest.php`
 - `tests/Feature/RegistrationAgreementTest.php`
+- `tests/Feature/StudentClassTest.php`
 - `tests/TestCase.php`
 - `tests/skills/sync-project-skill.test.mjs`
 

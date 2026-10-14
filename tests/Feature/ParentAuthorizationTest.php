@@ -111,7 +111,7 @@ class ParentAuthorizationTest extends TestCase
     {
         [$admin, $parent] = $this->accounts();
         $other = ParentAccount::create(['phone' => '13800000002', 'password' => 'OtherPass123']);
-        $data = ['name' => '测试学生', 'gender' => 'unspecified', 'school' => '测试学校', 'entry_year' => 2024, 'entry_grade' => 'P1', 'current_grade' => 'P3', 'contact_phone' => $parent->phone];
+        $data = ['name' => '测试学生', 'gender' => 'unspecified', 'school' => '测试学校', 'class_number' => '3', 'entry_year' => 2024, 'entry_grade' => 'P1', 'current_grade' => 'P3', 'contact_phone' => $parent->phone];
         $ownStudent = Student::create(['parent_id' => $parent->id, ...$data]);
         $otherStudent = Student::create(['parent_id' => $other->id, ...$data]);
         $parent->update(['must_change_password' => true]);

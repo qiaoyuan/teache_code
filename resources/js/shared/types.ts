@@ -13,8 +13,9 @@ export interface Student {
     name: string;
     gender: string;
     school: string;
-    entry_year: number;
-    entry_grade: string;
+    class_number: number | null;
+    entry_year: number | null;
+    entry_grade: string | null;
     current_grade: string;
     contact_phone: string;
     exams_count?: number;
@@ -99,6 +100,9 @@ export const gradeOptions = Object.entries({
 }).map(([value, label]) => ({ value, label }));
 export const gradeLabel = (v: string) =>
     gradeOptions.find((g) => g.value === v)?.label || v;
+export const classGradeLabel = (grade: string) => gradeLabel(grade).replace(/^小学/, "");
+export const classLabel = (student: Pick<Student, "current_grade" | "class_number">) =>
+    `${classGradeLabel(student.current_grade)}${student.current_grade.startsWith("P") ? "" : " "}${student.class_number == null ? "（班号未填写）" : student.class_number + "班"}`;
 export const sumScore = (e: Exam) =>
     e.subjects
         .filter((s) => s.mode === "score")

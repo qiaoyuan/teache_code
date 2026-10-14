@@ -15,7 +15,7 @@ class ExamRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        foreach (['title', 'school_at_exam'] as $key) {
+        foreach (['title'] as $key) {
             if (is_string($this->input($key))) {
                 $this->merge([$key => Text::clean($this->input($key))]);
             }
@@ -35,7 +35,7 @@ class ExamRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['title' => 'required|string|max:100', 'exam_date' => 'required|date_format:Y-m-d|before_or_equal:'.now('Asia/Shanghai')->toDateString(), 'grade_at_exam' => ['required', Rule::in(Text::grades())], 'school_at_exam' => 'required|string|max:160', 'note' => 'nullable|string|max:2000', 'version' => [$this->isMethod('PUT') ? 'required' : 'sometimes', 'integer', 'min:1'], 'subjects' => 'required|array|min:1|max:50', 'subjects.*.name' => 'required|string|max:80', 'subjects.*.mode' => ['required', Rule::in(['score', 'grade'])], 'subjects.*.score' => 'nullable|numeric|decimal:0,2|min:0|max:10000', 'subjects.*.max_score' => 'nullable|numeric|decimal:0,2|gt:0|max:10000', 'subjects.*.grade' => 'nullable|string|max:30'];
+        return ['title' => 'required|string|max:100', 'exam_date' => 'required|date_format:Y-m-d|before_or_equal:'.now('Asia/Shanghai')->toDateString(), 'grade_at_exam' => ['required', Rule::in(Text::grades())], 'note' => 'nullable|string|max:2000', 'version' => [$this->isMethod('PUT') ? 'required' : 'sometimes', 'integer', 'min:1'], 'subjects' => 'required|array|min:1|max:50', 'subjects.*.name' => 'required|string|max:80', 'subjects.*.mode' => ['required', Rule::in(['score', 'grade'])], 'subjects.*.score' => 'nullable|numeric|decimal:0,2|min:0|max:10000', 'subjects.*.max_score' => 'nullable|numeric|decimal:0,2|gt:0|max:10000', 'subjects.*.grade' => 'nullable|string|max:30'];
     }
 
     public function after(): array
