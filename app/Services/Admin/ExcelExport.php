@@ -74,7 +74,7 @@ class ExcelExport
                     }
                     foreach ($query->lazy(500) as $record) {
                         $values = match ($type) {
-                            'students' => [$record->id, $record->name, ['male' => '男', 'female' => '女', 'unspecified' => '未填写'][$record->gender], $record->school, $this->classroom($record), $record->contact_phone, $record->parent->phone, (int) $record->exams_count, (int) $record->intentions_count, $record->admitted_school],
+                            'students' => [$record->id, $record->name, ['male' => '男', 'female' => '女', 'unspecified' => '未填写'][$record->gender], $record->school, $this->classroom($record), $record->contact_phone, $record->parent->phone, (int) $record->exams_count, (int) $record->intentions_count, implode('、', $record->admitted_schools ?? [])],
                             'scores' => [$record->id, $record->exam->student->parent->phone, $record->exam->student->name, $record->exam->title, $record->exam->exam_date->toDateString(), $record->exam->school_at_exam, $this->grade($record->exam->grade_at_exam), $record->name, $record->mode === 'score' ? '分数' : '等级', $record->mode === 'score' ? (float) $record->score : '', $record->grade, $record->exam->note],
                             'intentions' => [$record->id, $record->student->parent->phone, $record->student->name, $record->student->school, $this->classroom($record->student), $record->school, $record->level === 'first' ? '优先' : '备选', $record->note],
                         };

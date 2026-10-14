@@ -11,7 +11,7 @@ const form = reactive({
     name: "",
     gender: "unspecified",
     school: "",
-    admitted_school: null as string | null,
+    admitted_schools: [] as string[],
     class_number: "",
     current_grade: "P1",
     contact_phone: state.user?.phone || "",
@@ -41,7 +41,7 @@ async function save() {
                 name: form.name,
                 gender: form.gender,
                 school: form.school,
-                admitted_school: form.admitted_school,
+                admitted_schools: form.admitted_schools,
                 current_grade: form.current_grade,
                 class_number: form.class_number,
                 contact_phone: form.contact_phone,
@@ -127,15 +127,24 @@ async function remove() {
             </span>
             <small id="class-number-help" class="class-help">班号为 1–99 的整数</small>
         </label>
-        <label class="field">
-            <span>已被录取学校（选填）</span>
-            <select :disabled="readOnly" v-model="form.admitted_school">
-                <option :value="null">暂不填写</option>
-                <option v-for="school in admittedSchoolOptions" :key="school" :value="school">
-                    {{ school }}
-                </option>
-            </select>
-        </label>
+        <fieldset class="admission-field" :disabled="readOnly || busy" aria-describedby="admission-help">
+            <legend>已被录取学校 <span>选填 · 可多选</span></legend>
+            <div class="admission-heading">
+                <p id="admission-help">点击选择，已选学校可再次点击取消</p>
+                <span class="admission-count" aria-live="polite">已选 {{ form.admitted_schools.length }} 所</span>
+            </div>
+            <div class="admission-options">
+                <label v-for="school in admittedSchoolOptions" :key="school" class="admission-option">
+                    <input type="checkbox" v-model="form.admitted_schools" :value="school" />
+                    <span class="admission-choice">
+                        <span>{{ school }}</span>
+                        <span class="admission-check" aria-hidden="true">
+                            <svg viewBox="0 0 16 16" fill="none"><path d="m4 8 2.5 2.5L12 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        </span>
+                    </span>
+                </label>
+            </div>
+        </fieldset>
         <label class="field"
             ><span>家长联系手机号</span
             ><input
@@ -166,3 +175,139 @@ async function remove() {
         </div>
     </form>
 </template>
+
+<style scoped>
+.admission-field {
+    min-width: 0;
+    margin: 25px 0;
+    padding: 0;
+    border: 0;
+}
+.admission-field legend {
+    padding: 0;
+    font-size: 14px;
+    font-weight: 650;
+}
+.admission-field legend span {
+    margin-left: 6px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 400;
+}
+.admission-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin: 9px 0 13px;
+    font-size: 11px;
+}
+.admission-heading p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.6;
+}
+.admission-count {
+    flex-shrink: 0;
+    padding: 4px 9px;
+    border-radius: 20px;
+    background: #edf3e8;
+    color: var(--green);
+}
+.admission-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+.admission-option {
+    position: relative;
+    min-width: 0;
+    cursor: pointer;
+}
+.admission-option input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: inherit;
+}
+.admission-choice {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    height: 100%;
+    min-height: 56px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fafbf8;
+    font-size: 13px;
+    line-height: 1.5;
+    transition: background 150ms ease, border-color 150ms ease;
+}
+.admission-check {
+    display: grid;
+    place-items: center;
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    border: 1px solid #cdd8cf;
+    border-radius: 50%;
+    background: white;
+    color: white;
+}
+.admission-check svg {
+    width: 14px;
+    height: 14px;
+    visibility: hidden;
+}
+.admission-option input:checked + .admission-choice {
+    border-color: #69917a;
+    background: #eef5e8;
+    color: var(--green);
+    font-weight: 600;
+}
+.admission-option input:checked + .admission-choice .admission-check {
+    border-color: var(--green);
+    background: var(--green);
+}
+.admission-option input:checked + .admission-choice svg {
+    visibility: visible;
+}
+.admission-option input:focus-visible + .admission-choice {
+    outline: 3px solid #aacb7e;
+    outline-offset: 3px;
+}
+.admission-field:disabled .admission-option {
+    cursor: default;
+}
+@media (hover: hover) {
+    .admission-option input:not(:disabled):hover + .admission-choice {
+        border-color: #69917a;
+    }
+}
+@media (min-width: 600px) {
+    .admission-options {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+@media (max-width: 380px) {
+    .admission-options {
+        gap: 8px;
+    }
+    .admission-choice {
+        gap: 6px;
+        padding: 10px 9px;
+        font-size: 12px;
+    }
+    .admission-check {
+        flex-basis: 16px;
+        width: 16px;
+        height: 16px;
+    }
+}
+</style>

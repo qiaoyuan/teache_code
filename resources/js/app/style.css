@@ -976,6 +976,24 @@ button:disabled {
     max-width: 700px;
     margin: auto;
 }
+.admission-summary {
+    display: block;
+    margin-top: 10px;
+}
+.admission-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+.admission-tags > span {
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: #eef5e8;
+    color: var(--green);
+    font-size: 11px;
+    line-height: 1.5;
+}
 .form-actions {
     display: flex;
     justify-content: space-between;

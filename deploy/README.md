@@ -115,6 +115,8 @@ sudo systemctl reload nginx
 
 ## 四、后续更新
 
+V1.12 录取学校多选新增 `admitted_schools` JSON 列；更新时先执行迁移，再构建前端。迁移自动保留并转换原单选记录（含软删除学生），不重建数据库。若浏览器缓存了旧单选页面，保存时会提示刷新。回退前备份新增多选数据，不能只依赖旧单选列。
+
 旧版 `npm run build` 会将线上绝对目录写入已跟踪的 `docs/skills/shengxue360-development/references/project-state.md`，导致下次拉取前出现本地改动。新版快照固定以 `.` 表示仓库根目录，同一份源码不会再因部署目录不同产生差异。若旧服务器出现此问题，先查看该文件的 `git diff`；仅在差异只有自动生成的“项目目录”一行时，在服务器项目目录执行：
 
 ```sh

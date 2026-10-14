@@ -18,7 +18,7 @@ class StudentController extends Controller
 
     public function store(StudentRequest $r)
     {
-        return response()->json(['data' => $r->user()->students()->create($r->validated())], 201);
+        return response()->json(['data' => $r->user()->students()->create($r->safe()->except(['admitted_school']))], 201);
     }
 
     public function show(string $id)
@@ -29,7 +29,7 @@ class StudentController extends Controller
     public function update(StudentRequest $r, string $id)
     {
         $s = $this->records->student($id);
-        $s->update($r->validated());
+        $s->update($r->safe()->except(['admitted_school']));
 
         return ['data' => $s];
     }

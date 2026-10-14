@@ -56,7 +56,7 @@ const columns = computed(
                 ["gender", "性别", 80],
                 ["school", "学校全称", 200],
                 ["classroom", "班级", 180],
-                ["admitted_school", "已被录取学校", 200],
+                ["admitted_schools", "已被录取学校", 240],
                 ["contact_phone", "联系手机号", 170],
                 ["exams_count", "考试次数", 100],
                 ["intentions_count", "意向数", 100],
@@ -117,6 +117,7 @@ function value(row: any, key: string): string {
     if (key === "target") return row.details?.username || row.details?.phone || row.details?.kind || "—";
     if (key === "classroom") return classLabel(row);
     if (key === "student.classroom") return classLabel(row.student);
+    if (key === "admitted_schools") return row.admitted_schools?.join("、") || "—";
     let v = key.split(".").reduce((o, k) => o?.[k], row);
     if (key === "created_at")
         return new Date(v).toLocaleString("zh-CN", {
@@ -415,7 +416,7 @@ async function reset() {
                                 classLabel(s.row)
                             }}</template></el-table-column
                         ><el-table-column label="已被录取学校"
-                            ><template #default="s">{{ s.row.admitted_school || "—" }}</template></el-table-column
+                            ><template #default="s">{{ s.row.admitted_schools?.join("、") || "—" }}</template></el-table-column
                         ></el-table
                     ></template
                 ><template v-else-if="detailType === 'student'"
@@ -433,7 +434,7 @@ async function reset() {
                         }}</el-descriptions-item
                         ><el-descriptions-item label="学校全称">{{ detail.school }}</el-descriptions-item
                         ><el-descriptions-item label="班级">{{ classLabel(detail) }}</el-descriptions-item
-                        ><el-descriptions-item label="已被录取学校">{{ detail.admitted_school || "—" }}</el-descriptions-item></el-descriptions>
+                        ><el-descriptions-item label="已被录取学校" :span="2">{{ detail.admitted_schools?.join("、") || "—" }}</el-descriptions-item></el-descriptions>
                     <h3>单科成绩分析</h3>
                     <el-select
                         v-if="detailSubjects.length"

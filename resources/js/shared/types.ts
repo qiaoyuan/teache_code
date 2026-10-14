@@ -13,7 +13,7 @@ export interface Student {
     name: string;
     gender: string;
     school: string;
-    admitted_school: string | null;
+    admitted_schools: string[];
     class_number: number | null;
     entry_year: number | null;
     entry_grade: string | null;

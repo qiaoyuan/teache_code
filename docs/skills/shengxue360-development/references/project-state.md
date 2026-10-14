@@ -1,8 +1,8 @@
 # 项目结构快照（自动生成）
 
 项目目录：`.`（仓库根目录；以下文件路径均相对此目录）
-设计版本：V1.11
-源文件指纹：`1a91bf87d93d516c71183276b66574ec9d4c680443da724879e05bb67decf03a`
+设计版本：V1.12
+源文件指纹：`5c774b01c94110e0a771b87bc5d814d8688d5e3cb5396e8d3840ab663362c534`
 
 来源是当前磁盘文件，不代表测试通过、需求确认或部署完成。不读取数据库、环境凭据或聊天。
 
@@ -134,6 +134,7 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 - `database/migrations/2026_10_13_000002_add_auth_version_to_administrators.php`
 - `database/migrations/2026_10_13_000003_add_class_number_to_students.php`
 - `database/migrations/2026_10_14_000001_add_admitted_school_to_students.php`
+- `database/migrations/2026_10_14_000002_add_admitted_schools_to_students.php`
 - `database/seeders/DatabaseSeeder.php`
 
 ## 前端与模板
@@ -174,6 +175,7 @@ Route::get('exports/{kind}', [A\ExportController::class, 'download']);
 - `tests/Feature/GrowthSystemTest.php`
 - `tests/Feature/ParentAuthorizationTest.php`
 - `tests/Feature/RegistrationAgreementTest.php`
+- `tests/Feature/StudentAdmissionMigrationTest.php`
 - `tests/Feature/StudentAdmissionTest.php`
 - `tests/Feature/StudentClassTest.php`
 - `tests/TestCase.php`
