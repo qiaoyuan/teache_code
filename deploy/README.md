@@ -115,6 +115,15 @@ sudo systemctl reload nginx
 
 ## 四、后续更新
 
+旧版 `npm run build` 会将线上绝对目录写入已跟踪的 `docs/skills/shengxue360-development/references/project-state.md`，导致下次拉取前出现本地改动。新版快照固定以 `.` 表示仓库根目录，同一份源码不会再因部署目录不同产生差异。若旧服务器出现此问题，先查看该文件的 `git diff`；仅在差异只有自动生成的“项目目录”一行时，在服务器项目目录执行：
+
+```sh
+git restore -- docs/skills/shengxue360-development/references/project-state.md
+git pull --ff-only
+```
+
+上述恢复只针对这份生成快照；若还有其他改动，先检查并保留。持久修复需要拉取包含新版同步脚本的提交，旧脚本再次构建仍会写入绝对路径。
+
 先备份数据库以及受限保存的 `.env`/APP_KEY；数据库备份放在 public 之外。保留上一版代码和构建产物。使用部署用户进入项目目录：
 
 ```sh

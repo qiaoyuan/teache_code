@@ -62,6 +62,31 @@ test('重复同步没有反馈循环，不重写文件；手写规则编辑会�
   assert.ok(read(path.join(f.skillHome, name, 'SKILL.md')).includes('新确认的规则。'));
 });
 
+test('同一份代码部署到不同目录后同步不修改已生成文件', t => {
+  const local = fixture(t);
+  const server = fixture(t);
+  const first = syncSkill({ ...local.options, install: true });
+  fs.cpSync(path.join(local.root, skillDir), path.join(server.root, skillDir), { recursive: true });
+
+  const files = ['SKILL.md', 'agents/openai.yaml', 'references/project-state.md'];
+  for (const file of files) fs.utimesSync(path.join(server.root, skillDir, file), 1000, 1000);
+  const deployed = syncSkill(server.options);
+  assert.equal(deployed.fingerprint, first.fingerprint);
+  assert.equal(deployed.target, null);
+  assert.equal(deployed.updated, false);
+  for (const file of files) {
+    const source = read(path.join(local.root, skillDir, file));
+    assert.equal(read(path.join(server.root, skillDir, file)), source);
+    assert.equal(read(path.join(local.skillHome, name, file)), source);
+    assert.equal(fs.statSync(path.join(server.root, skillDir, file)).mtimeMs, 1000000);
+  }
+  const snapshot = read(path.join(server.root, skillDir, 'references/project-state.md'));
+  assert.ok(!snapshot.includes(fs.realpathSync(local.root)));
+  assert.ok(!snapshot.includes(fs.realpathSync(server.root)));
+  assert.equal(JSON.parse(read(path.join(local.skillHome, name, '.project-binding.json'))).root, fs.realpathSync(local.root));
+  assert.equal(syncSkill(server.options).updated, false);
+});
+
 test('环境、业务备份和符号链接不进入清单或影响指纹', t => {
   const f = fixture(t);
   const before = syncSkill(f.options);

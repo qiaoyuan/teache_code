@@ -42,6 +42,8 @@ rtk proxy ./scripts/node npm run skill:test
 
 同步使用源文件白名单，不读取 `.env`、账号凭据、业务数据库、备份、日志和聊天，不执行迁移或部署。安装登记、源文件哈希和短期锁放在已被 Git 忽略的 `storage/app/private/skill-sync/`，不含源代码和业务内容。无变化不改写文件，避免 hook 自触发循环。
 
+生成快照以 `.` 表示仓库根目录，不记录执行机器的绝对路径。同一份源码在本机与线上构建后的快照应一致；安装副本的私有 `.project-binding.json` 仍记录实际路径以核对项目归属。旧版线上遗留的路径差异处理见 `deploy/README.md`。
+
 ## 注册协议
 
 家长注册需主动同意《用户协议与隐私政策》，可在弹窗阅读或访问 `/app/agreement` 阅读完整页面。服务端拒绝未同意或旧版本注册，保存当前版本及 UTC 同意时间；原有账号记录保持 NULL。协议版本、最近更新日期与联系方式位于 `config/agreement.php`，正文位于 `resources/views/agreement.blade.php`。修改正文时同步更新版本。

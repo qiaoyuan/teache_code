@@ -116,7 +116,7 @@ function snapshot(root, files, fingerprint) {
   const routeFile = path.join(root, 'routes/web.php');
   const routeLines = fs.existsSync(routeFile) ? read(routeFile).split('\n').filter(line => /Route::(?:get|post|put|patch|delete|prefix|middleware|pattern)\(|foreach\s*\(/.test(line)).map(line => line.trim()) : [];
   const lines = [
-    '# 项目结构快照（自动生成）', '', `项目目录：\`${root}\``, `设计版本：${version}`, `源文件指纹：\`${fingerprint}\``, '',
+    '# 项目结构快照（自动生成）', '', '项目目录：`.`（仓库根目录；以下文件路径均相对此目录）', `设计版本：${version}`, `源文件指纹：\`${fingerprint}\``, '',
     '来源是当前磁盘文件，不代表测试通过、需求确认或部署完成。不读取数据库、环境凭据或聊天。', '',
     '开发依据：项目根目录的 `docs/开发设计文档.md`、`docs/AI开发指令.md` 和 `README.md`。', '',
     '## 锁定依赖', '', '| 依赖 | 版本 |', '| --- | --- |',
