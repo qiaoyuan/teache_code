@@ -138,19 +138,11 @@ watch(() => state.selectedId, load);
                             ><strong>{{ examCount }}<em>次</em></strong>
                         </div>
                         <div>
-                            <small>{{
-                                current?.normalized
-                                    ? "当前科目最好得分率"
-                                    : "当前科目最高分"
-                            }}</small
+                            <small>当前科目最高分</small
                             ><strong
                                 >{{
-                                    (current?.normalized
-                                        ? current?.best_rate
-                                        : current?.best_score) ?? "—"
-                                }}<em v-if="current?.best_rate != null">{{
-                                    current?.normalized ? "%" : "分"
-                                }}</em></strong
+                                    current?.best_score ?? "—"
+                                }}<em v-if="current?.best_score != null">分</em></strong
                             >
                         </div>
                     </div>

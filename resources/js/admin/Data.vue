@@ -80,8 +80,6 @@ const columns = computed(
                 ["name", "科目", 110],
                 ["mode", "记录方式", 100],
                 ["score", "分数", 100],
-                ["max_score", "满分", 100],
-                ["rate", "得分率", 110],
                 ["grade", "等级", 110],
             ],
             intentions: [
@@ -104,11 +102,6 @@ const columns = computed(
         })[kind.value] || []) as [string, string, number][],
 );
 function value(row: any, key: string): string {
-    if (key === "rate")
-        return row.mode === "score"
-            ? ((Number(row.score) / Number(row.max_score)) * 100).toFixed(2) +
-                  "%"
-            : "—";
     if (key === "details_text")
         return row.action === "data_export"
             ? JSON.stringify(row.details?.filters || {}) +
@@ -451,8 +444,8 @@ async function reset() {
                     <div v-if="currentSubject" class="drawer-chart">
                         <TrendChart :subject="currentSubject" />
                         <p class="muted">
-                            平均得分率 {{ currentSubject.mean_rate ?? "—" }}% ·
-                            最好得分率 {{ currentSubject.best_rate ?? "—" }}%
+                            平均分 {{ currentSubject.mean_score ?? "—" }} 分 ·
+                            最高分 {{ currentSubject.best_score ?? "—" }} 分
                         </p>
                         <p v-for="g in currentSubject.grades" :key="g.label">
                             等级 {{ g.label }} · {{ g.count }} 条
@@ -477,7 +470,7 @@ async function reset() {
                                 >{{ s.name }}
                                 {{
                                     s.mode === "score"
-                                        ? `${s.score} / ${s.max_score}`
+                                        ? `${s.score} 分`
                                         : s.grade
                                 }}　</span
                             >
@@ -515,18 +508,8 @@ async function reset() {
                         /><el-table-column label="成绩"
                             ><template #default="s">{{
                                 s.row.mode === "score"
-                                    ? s.row.score + " / " + s.row.max_score
+                                    ? s.row.score + " 分"
                                     : s.row.grade
-                            }}</template></el-table-column
-                        ><el-table-column label="得分率"
-                            ><template #default="s">{{
-                                s.row.mode === "score"
-                                    ? (
-                                          (Number(s.row.score) /
-                                              Number(s.row.max_score)) *
-                                          100
-                                      ).toFixed(2) + "%"
-                                    : "—"
                             }}</template></el-table-column
                         ></el-table
                     >

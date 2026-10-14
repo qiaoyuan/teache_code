@@ -58,7 +58,7 @@ class Records
                 $exam = $student->exams()->create($data);
             }
             foreach ($subjects as $position => $s) {
-                $exam->subjects()->create(['name' => $s['name'], 'subject_key' => Text::key($s['name']), 'mode' => $s['mode'], 'score' => $s['mode'] === 'score' ? $s['score'] : null, 'max_score' => $s['mode'] === 'score' ? $s['max_score'] : null, 'grade' => $s['mode'] === 'grade' ? $s['grade'] : null, 'position' => $position]);
+                $exam->subjects()->create(['name' => $s['name'], 'subject_key' => Text::key($s['name']), 'mode' => $s['mode'], 'score' => $s['mode'] === 'score' ? $s['score'] : null, 'max_score' => null, 'grade' => $s['mode'] === 'grade' ? $s['grade'] : null, 'position' => $position]);
             }
 
             return $exam->fresh('subjects');

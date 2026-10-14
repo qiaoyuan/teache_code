@@ -65,30 +65,10 @@ async function remove() {
                     <strong>{{ s.name }}</strong
                     ><span class="detail-score"
                         >{{ s.mode === "score" ? s.score : s.grade
-                        }}<small v-if="s.mode === 'score'">
-                            / {{ s.max_score }}</small
-                        ></span
+                        }}<small v-if="s.mode === 'score'"> 分</small></span
                     >
                 </div>
-                <div v-if="s.mode === 'score'" class="score-bar">
-                    <i
-                        :style="{
-                            width:
-                                (Number(s.score) / Number(s.max_score)) * 100 +
-                                '%',
-                        }"
-                    ></i>
-                </div>
-                <small class="hint">{{
-                    s.mode === "score"
-                        ? "得分率 " +
-                          (
-                              (Number(s.score) / Number(s.max_score)) *
-                              100
-                          ).toFixed(2) +
-                          "%"
-                        : "等级成绩 · 不换算分数"
-                }}</small>
+                <small v-if="s.mode === 'grade'" class="hint">等级成绩 · 不换算分数</small>
             </div>
             <div
                 v-if="exam.subjects.some((s) => s.mode === 'score')"
@@ -97,9 +77,6 @@ async function remove() {
                 <span>{{ subtotalLabel(exam) }}</span
                 ><strong>{{ sumScore(exam) }}</strong>
             </div>
-            <p class="hint">
-                各科条形按得分率展示，便于对照本次考试；等级独立展示。
-            </p>
             <p v-if="exam.note" class="note preserve">{{ exam.note }}</p>
             <div v-if="!readOnly" class="form-actions">
                 <RouterLink class="primary" :to="`/exams/${exam.id}/edit`"

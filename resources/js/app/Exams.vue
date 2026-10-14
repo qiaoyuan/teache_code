@@ -103,9 +103,7 @@ function next(n: number) {
                     ><strong>{{
                         s.mode === "score" ? s.score : s.grade
                     }}</strong
-                    ><em v-if="s.mode === 'score'">
-                        / {{ s.max_score }}</em
-                    ></span
+                    ><em v-if="s.mode === 'score'">分</em></span
                 >
             </div>
             <div class="exam-foot">
@@ -162,26 +160,20 @@ function next(n: number) {
                         ><strong>{{ current.score_count }}<em>次</em></strong>
                     </div>
                     <div>
-                        <small>平均得分率</small
+                        <small>平均分</small
                         ><strong
-                            >{{ current.mean_rate ?? "—"
-                            }}<em v-if="current.mean_rate != null"
-                                >%</em
+                            >{{ current.mean_score ?? "—"
+                            }}<em v-if="current.mean_score != null"
+                                >分</em
                             ></strong
                         >
                     </div>
                     <div>
-                        <small>{{
-                            current.normalized ? "最好得分率" : "最高分"
-                        }}</small
+                        <small>最高分</small
                         ><strong
                             >{{
-                                (current.normalized
-                                    ? current.best_rate
-                                    : current.best_score) ?? "—"
-                            }}<em v-if="current.best_rate != null">{{
-                                current.normalized ? "%" : "分"
-                            }}</em></strong
+                                current.best_score ?? "—"
+                            }}<em v-if="current.best_score != null">分</em></strong
                         >
                     </div>
                 </div>
@@ -190,8 +182,7 @@ function next(n: number) {
                     <li v-for="(p, i) in current.points" :key="i">
                         <span>{{ p.date }} · {{ p.title }}</span
                         ><strong
-                            >{{ p.score }} / {{ p.max_score }}
-                            <small>({{ p.rate }}%)</small></strong
+                            >{{ p.score }} 分</strong
                         >
                     </li>
                 </ul>

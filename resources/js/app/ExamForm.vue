@@ -20,7 +20,6 @@ const blank = (name = ""): Subject => ({
     name,
     mode: "score",
     score: null,
-    max_score: 100,
     grade: "",
 });
 const form = reactive({
@@ -171,30 +170,18 @@ async function save() {
                     placeholder="选择或输入科目"
                     required
             /></label>
-            <div v-if="s.mode === 'score'" class="form-grid">
-                <label class="field"
-                    ><span>满分</span
-                    ><input
-                        v-model="s.max_score"
-                        type="number"
-                        min="0.01"
-                        max="10000"
-                        step="0.01"
-                        inputmode="decimal"
-                        required /></label
-                ><label class="field"
-                    ><span>实际分数</span
-                    ><input
-                        v-model="s.score"
-                        type="number"
-                        min="0"
-                        :max="Number(s.max_score) || 10000"
-                        step="0.01"
-                        inputmode="decimal"
-                        placeholder="0 分也可以填写"
-                        required
-                /></label>
-            </div>
+            <label v-if="s.mode === 'score'" class="field"
+                ><span>分数</span
+                ><input
+                    v-model="s.score"
+                    type="number"
+                    min="0"
+                    max="10000"
+                    step="0.01"
+                    inputmode="decimal"
+                    placeholder="0 分也可以填写"
+                    required
+            /></label>
             <label v-else class="field"
                 ><span>等级</span
                 ><input

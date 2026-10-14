@@ -173,12 +173,16 @@ class GrowthSystemTest extends TestCase
         $s = $this->student($p);
         $this->signIn($p);
         $url = '/api/v1/app/students/'.$s->id.'/exams';
-        foreach ([['name' => '数学', 'mode' => 'score', 'score' => 101, 'max_score' => 100], ['name' => '数学', 'mode' => 'score', 'score' => 50.123, 'max_score' => 100], ['name' => '数学', 'mode' => 'score', 'score' => 50, 'max_score' => 0], ['name' => '数学', 'mode' => 'score', 'score' => 50, 'max_score' => 100, 'grade' => 'A'], ['name' => '数学', 'mode' => 'grade', 'grade' => 'A', 'score' => 1], ['name' => '数学', 'mode' => 'grade', 'grade' => '']] as $subject) {
+        foreach ([['name' => '数学', 'mode' => 'score'], ...array_map(fn ($score) => ['name' => '数学', 'mode' => 'score', 'score' => $score], [null, '', -1, 10000.01, 50.123]), ['name' => '数学', 'mode' => 'score', 'score' => 50, 'grade' => 'A'], ['name' => '数学', 'mode' => 'grade', 'grade' => 'A', 'score' => 1], ['name' => '数学', 'mode' => 'grade', 'grade' => '']] as $subject) {
             $this->postJson($url, $this->examData([$subject]))->assertStatus(400);
         }
         $this->postJson($url, $this->examData([['name' => ' Ｍath ', 'mode' => 'score', 'score' => 1, 'max_score' => 100], ['name' => 'math', 'mode' => 'grade', 'grade' => 'A']]))->assertStatus(400);
-        $e = $this->saveExam($s, [['name' => '数学', 'mode' => 'score', 'score' => 0, 'max_score' => 100]]);
+        $e = $this->saveExam($s, [['name' => '数学', 'mode' => 'score', 'score' => 0]]);
         $this->assertSame('0.00', $e['subjects'][0]['score']);
+        $this->assertNull($e['subjects'][0]['max_score']);
+        foreach ([100.01, 150, 10000] as $score) {
+            $this->saveExam($s, [['name' => '数学', 'mode' => 'score', 'score' => $score]]);
+        }
     }
 
     public function test_exam_updates_are_atomic_and_reject_stale_versions(): void
@@ -194,22 +198,71 @@ class GrowthSystemTest extends TestCase
         $this->assertSame(1, ExamSubject::count());
     }
 
-    public function test_analysis_normalizes_different_maxima_and_separates_custom_grades(): void
+    public function test_analysis_uses_scores_with_legacy_maxima_and_separates_custom_grades(): void
     {
         $p = $this->parent();
         $s = $this->student($p);
         $this->signIn($p);
-        $this->saveExam($s, [['name' => '数学', 'mode' => 'score', 'score' => 80, 'max_score' => 100], ['name' => '英语', 'mode' => 'grade', 'grade' => '优秀']]);
-        $this->saveExam($s, [['name' => '数学', 'mode' => 'score', 'score' => 90, 'max_score' => 120], ['name' => '英语', 'mode' => 'grade', 'grade' => 'A+']]);
+        $legacy = $this->saveExam($s, [['name' => '数学', 'mode' => 'score', 'score' => 80], ['name' => '英语', 'mode' => 'grade', 'grade' => '优秀']]);
+        ExamSubject::findOrFail($legacy['subjects'][0]['id'])->update(['max_score' => 100]);
+        $this->saveExam($s, [['name' => '数学', 'mode' => 'score', 'score' => 120], ['name' => '英语', 'mode' => 'grade', 'grade' => 'A+']]);
+        $this->saveExam($s, [['name' => '数学', 'mode' => 'score', 'score' => 0]]);
         $a = $this->getJson('/api/v1/app/students/'.$s->id.'/analysis')->assertOk()->json();
         $math = collect($a['subjects'])->firstWhere('name', '数学');
         $english = collect($a['subjects'])->firstWhere('name', '英语');
-        $this->assertTrue($math['normalized']);
-        $this->assertEquals(77.5, $math['mean_rate']);
-        $this->assertEquals(80, $math['best_rate']);
-        $this->assertEquals([80, 75], array_column($math['points'], 'value'));
-        $this->assertNull($english['mean_rate']);
+        $this->assertSame('分', $math['unit']);
+        $this->assertEquals(66.67, $math['mean_score']);
+        $this->assertEquals(120, $math['best_score']);
+        $this->assertEquals([80, 120, 0], array_column($math['points'], 'value'));
+        $this->assertNull($english['mean_score']);
+        $this->assertNull($english['best_score']);
         $this->assertCount(2, $english['grades']);
+        $this->actingAs($this->admin(), 'admin');
+        $stats = $this->getJson('/api/v1/admin/analysis')->assertOk()->json();
+        $adminMath = collect($stats['subjects'])->firstWhere('name', '数学');
+        $adminEnglish = collect($stats['subjects'])->firstWhere('name', '英语');
+        $this->assertEquals($math['mean_score'], $adminMath['mean_score']);
+        $this->assertEquals($math['best_score'], $adminMath['best_score']);
+        $this->assertNull($adminEnglish['mean_score']);
+        $this->assertNull($adminEnglish['best_score']);
+    }
+
+    public function test_editing_legacy_exam_only_requires_score_and_preserves_previous_rows(): void
+    {
+        $p = $this->parent();
+        $s = $this->student($p);
+        $this->signIn($p);
+        $e = $this->saveExam($s);
+        $old = ExamSubject::findOrFail($e['subjects'][0]['id']);
+        $old->update(['max_score' => 100]);
+        $url = '/api/v1/app/exams/'.$e['id'];
+        $payload = $this->examData([
+            ['name' => '数学', 'mode' => 'score', 'score' => 120.5],
+            ['name' => '英语', 'mode' => 'grade', 'grade' => '优秀'],
+        ], ['version' => 1]);
+        $this->putJson($url, $payload)->assertOk()
+            ->assertJsonPath('data.subjects.0.score', '120.50')
+            ->assertJsonPath('data.subjects.0.max_score', null)
+            ->assertJsonPath('data.subjects.1.score', null)
+            ->assertJsonPath('data.subjects.1.grade', '优秀');
+        $this->assertSame('100.00', $old->fresh()->max_score);
+        $this->assertSoftDeleted($old);
+        $this->getJson($url)->assertOk()->assertJsonPath('data.subjects.0.score', '120.50');
+        $this->putJson($url, [...$payload, 'version' => 2, 'subjects' => [
+            ['name' => '数学', 'mode' => 'score', 'score' => 130],
+            ['name' => '英语', 'mode' => 'score', 'score' => -1],
+        ]])->assertStatus(400);
+        $this->getJson($url)->assertJsonPath('data.version', 2)->assertJsonPath('data.subjects.0.score', '120.50');
+    }
+
+    public function test_legacy_maximum_input_is_ignored_instead_of_limiting_the_score(): void
+    {
+        $p = $this->parent();
+        $s = $this->student($p);
+        $this->signIn($p);
+        $e = $this->saveExam($s, [['name' => '数学', 'mode' => 'score', 'score' => 120, 'max_score' => 100]]);
+        $this->assertSame('120.00', $e['subjects'][0]['score']);
+        $this->assertNull($e['subjects'][0]['max_score']);
     }
 
     public function test_intention_unique_normalization_soft_delete_and_priority(): void
@@ -323,7 +376,7 @@ class GrowthSystemTest extends TestCase
         $this->actingAs($this->admin(), 'admin');
         $stats = $this->getJson('/api/v1/admin/analysis')->assertOk()->json();
         $math = collect($stats['subjects'])->firstWhere('name', '数学');
-        $this->assertEquals(77.5, $math['mean_rate']);
+        $this->assertEquals(85, $math['mean_score']);
         $this->assertCount(2, $stats['intentions']);
     }
 
@@ -357,7 +410,7 @@ class GrowthSystemTest extends TestCase
         $p = $this->parent();
         $this->signIn($p);
         $s = $this->student($p, ['name' => '=HYPERLINK("evil","click")']);
-        $this->saveExam($s, [['name' => '数学', 'mode' => 'score', 'score' => 80, 'max_score' => 100]]);
+        $this->saveExam($s, [['name' => '数学', 'mode' => 'score', 'score' => 120.5], ['name' => '英语', 'mode' => 'grade', 'grade' => '优秀']]);
         for ($i = 0; $i < 24; $i++) {
             $this->student($p, ['name' => '学生'.$i]);
         }
@@ -370,7 +423,13 @@ class GrowthSystemTest extends TestCase
         $row = collect($e['sheets']['学生档案'])->first(fn ($r) => ($r[1] ?? '') === '=HYPERLINK("evil","click")');
         $this->assertSame('13800000001', $row[6]);
         $this->assertStringNotContainsString('<f>', $e['xml']);
-        $this->assertEquals(80, $e['sheets']['科目成绩'][1][9]);
+        $scores = $e['sheets']['科目成绩'];
+        $this->assertSame(['分数', '等级', '考试备注'], array_slice($scores[0], 9));
+        $this->assertCount(12, $scores[1]);
+        $this->assertEquals(120.5, $scores[1][9]);
+        $this->assertSame('', $scores[1][10]);
+        $this->assertSame('', $scores[2][9]);
+        $this->assertSame('优秀', $scores[2][10]);
     }
 
     public function test_all_export_groups_each_sheet_by_phone_and_name_across_batches(): void

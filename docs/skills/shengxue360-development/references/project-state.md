@@ -1,8 +1,8 @@
 # 项目结构快照（自动生成）
 
 项目目录：`/Users/qiaoyuan/www/php/teache_code`
-设计版本：V1.9
-源文件指纹：`7a2dd3eb9e5074c8a04160b3c4d901cb0cb190cfc0c58ad2afb812011fc89eec`
+设计版本：V1.10
+源文件指纹：`17a3db08b6275dca6f90c4e20cf25c1afb3609bb6a35b62affb7af614edf24a9`
 
 来源是当前磁盘文件，不代表测试通过、需求确认或部署完成。不读取数据库、环境凭据或聊天。
 

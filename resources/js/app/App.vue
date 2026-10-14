@@ -55,8 +55,8 @@ function nav(kind: string) {
             >
                 <option v-for="s in state.students" :key="s.id" :value="s.id">
                     {{ s.name }}
-                </option></select
-            ><RouterLink v-if="!readOnly" to="/students/new">＋ 添加</RouterLink>
+                </option>
+            </select>
         </div>
         <RouterView :key="route.fullPath" />
         <nav v-if="!isAuth" class="bottom-nav" aria-label="主导航">

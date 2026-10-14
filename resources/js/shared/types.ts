@@ -30,7 +30,6 @@ export interface Subject {
     subject_key?: string;
     mode: "score" | "grade";
     score: string | number | null;
-    max_score: string | number | null;
     grade: string | null;
     exam?: Exam;
 }
@@ -59,8 +58,6 @@ export interface Point {
     title: string;
     exam_id: number;
     score: number;
-    max_score: number;
-    rate: number;
     value: number;
 }
 export interface SubjectAnalysis {
@@ -68,11 +65,8 @@ export interface SubjectAnalysis {
     name: string;
     score_count: number;
     grade_count: number;
-    normalized: boolean;
     unit: string;
-    max_score: number | null;
-    mean_rate: number | null;
-    best_rate: number | null;
+    mean_score: number | null;
     best_score: number | null;
     points: Point[];
     grades: { label: string; count: number }[];
@@ -119,13 +113,11 @@ export const cleanSubject = (s: Subject) =>
               name: s.name,
               mode: s.mode,
               score: s.score,
-              max_score: s.max_score,
               grade: null,
           }
         : {
               name: s.name,
               mode: s.mode,
               score: null,
-              max_score: null,
               grade: s.grade,
           };

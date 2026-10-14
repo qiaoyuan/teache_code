@@ -17,6 +17,9 @@ const current = computed(
         subjects.value.find((s) => s.key === selected.value) ||
         subjects.value[0],
 );
+const scoreScale = computed(() =>
+    Math.max(1, ...subjects.value.map((s) => s.mean_score ?? 0)),
+);
 const metrics = [
     { key: "parents", label: "注册家长", unit: "人", icon: "◯" },
     { key: "students", label: "在册学生", unit: "人", icon: "▤" },
@@ -108,8 +111,8 @@ async function exportAll() {
             <section class="panel">
                 <div class="panel-heading">
                     <div>
-                        <h2>各科平均得分率</h2>
-                        <p>每条成绩按自己的满分计算，再取算术平均</p>
+                        <h2>各科平均分</h2>
+                        <p>按录入分数取算术平均，单位：分</p>
                     </div>
                     <span class="tag">分数成绩</span>
                 </div>
@@ -119,8 +122,8 @@ async function exportAll() {
                     class="horizontal-bar"
                 >
                     <span>{{ s.name }}</span>
-                    <div><i :style="{ width: s.mean_rate + '%' }"></i></div>
-                    <strong>{{ s.mean_rate }}%</strong
+                    <div><i :style="{ width: ((s.mean_score ?? 0) / scoreScale) * 100 + '%' }"></i></div>
+                    <strong>{{ s.mean_score }} 分</strong
                     ><small>{{ s.score_count }} 条</small>
                 </div>
                 <el-empty

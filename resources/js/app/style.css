@@ -999,10 +999,6 @@ button:disabled {
     background: white;
     max-width: 160px;
 }
-.student-switch a {
-    margin-left: auto;
-    color: var(--green);
-}
 .brand {
     text-decoration: none;
 }
@@ -1247,19 +1243,6 @@ button:disabled {
     font-size: 12px;
     color: var(--muted);
     font-weight: 400;
-}
-.score-bar {
-    height: 8px;
-    border-radius: 5px;
-    background: #f1f4eb;
-    overflow: hidden;
-    margin: 12px 0 7px;
-}
-.score-bar i {
-    display: block;
-    height: 100%;
-    background: #9cb975;
-    border-radius: 5px;
 }
 .subtotal {
     padding: 20px 0;

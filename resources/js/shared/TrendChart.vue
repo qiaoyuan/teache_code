@@ -3,7 +3,7 @@ import { computed } from "vue";
 import type { SubjectAnalysis } from "./types";
 const props = defineProps<{ subject: SubjectAnalysis }>();
 const max = computed(() =>
-    props.subject.normalized ? 100 : Number(props.subject.max_score) || 100,
+    props.subject.points.reduce((highest, p) => Math.max(highest, p.value), 1) * 1.1,
 );
 const coords = computed(() =>
     props.subject.points.map((p, i) => ({
@@ -35,7 +35,7 @@ const coords = computed(() =>
                     stroke-dasharray="4 5"
                 />
                 <text x="5" :y="194 - tick * 150" fill="#859183" font-size="11">
-                    {{ (max * tick).toFixed(0) }}
+                    {{ Number((max * tick).toFixed(2)) }}
                 </text>
             </g>
             <polyline
@@ -55,8 +55,7 @@ const coords = computed(() =>
                     stroke-width="2"
                 >
                     <title>
-                        {{ p.title }} · {{ p.date }}：{{ p.score }} /
-                        {{ p.max_score }}（{{ p.rate }}%）
+                        {{ p.title }} · {{ p.date }}：{{ p.score }} 分
                     </title>
                 </circle>
                 <text
@@ -84,12 +83,7 @@ const coords = computed(() =>
         </svg>
         <div v-else class="empty">这个科目暂时没有分数成绩</div>
         <p class="hint">
-            {{
-                subject.normalized
-                    ? "满分不同，按得分率比较"
-                    : "相同满分，按原始分数比较"
-            }}
-            · 等级另行统计
+            按录入分数展示 · 等级另行统计
         </p>
     </div>
 </template>
